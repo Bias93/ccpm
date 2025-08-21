@@ -428,11 +428,13 @@ Starting from just an idea? Use the automated setup:
 ```bash
 mkdir my-new-project
 cd my-new-project
-git init
 git clone https://github.com/Bias93/ccpm.git .
 
-# One command does everything:
-/pm:new-project my-new-project your-github-username your-email@example.com "Your Name"
+# Simple setup (uses your existing git config):
+/pm:new-project my-new-project
+
+# Or with GitHub username override:
+/pm:new-project my-new-project --github-user your-github-username
 
 # Then create GitHub repo and push:
 git push -u origin main
@@ -446,18 +448,18 @@ cd my-new-project
 # Write down your raw idea
 echo "My app idea: A tool that helps developers..." > IDEA.md
 
-git init
 git clone https://github.com/Bias93/ccpm.git .
 
 # Setup with idea processing:
-/pm:new-project my-new-project your-github-username your-email@example.com "Your Name" --from-idea IDEA.md
+/pm:new-project my-new-project --from-idea IDEA.md
 
 # Then create GitHub repo and push:
 git push -u origin main
 ```
 
 This command automatically:
-- Configures git identity
+- **Auto-detects** your git configuration (email, name, GitHub username)
+- **Only prompts** for missing information
 - Fixes git remote to point to YOUR repository  
 - Updates README with your details
 - Initializes CCPM system

@@ -8,26 +8,58 @@ Automated setup for brand new projects using enhanced CCPM.
 
 ## Usage
 ```
-/pm:new-project <project-name> <github-username> <user-email> <user-name> [--from-idea <idea-file>]
+/pm:new-project <project-name> [options]
 ```
+
+Options:
+- `--github-user <username>` - GitHub username (auto-detected from git config if not provided)
+- `--email <email>` - Git email (uses existing git config if not provided)  
+- `--name <name>` - Git display name (uses existing git config if not provided)
+- `--from-idea <file>` - Create PRD from idea file
 
 Examples:
 ```
-# Basic setup
-/pm:new-project my-awesome-app davide123 davide@example.com "Davide Rossi"
+# Simple setup (uses existing git config):
+/pm:new-project my-awesome-app
 
-# From idea file
+# With GitHub username override:
+/pm:new-project my-awesome-app --github-user Bias93
+
+# Complete custom setup:
+/pm:new-project my-awesome-app --github-user Bias93 --email custom@email.com --name "Custom Name"
+
+# From idea file:
 echo "My app idea: A tool that..." > IDEA.md
-/pm:new-project my-awesome-app davide123 davide@example.com "Davide Rossi" --from-idea IDEA.md
+/pm:new-project my-awesome-app --from-idea IDEA.md
 ```
 
 ## Instructions
 
-### 1. Parameter Validation
+### 1. Parameter Detection and Validation
+
+**Auto-detect git configuration:**
+```bash
+# Try to get GitHub username from git config
+github_user=$(git config --get user.github || git config --get github.user || "")
+if [ -z "$github_user" ]; then
+    github_user=$(git config --get remote.origin.url | sed -n 's/.*github.com[:/]\([^/]*\).*/\1/p' || "")
+fi
+
+# Get git identity
+user_email=$(git config user.email || "")
+user_name=$(git config user.name || "")
+
+echo "🔍 Auto-detected configuration:"
+echo "  GitHub user: ${github_user:-"not found"}"
+echo "  Email: ${user_email:-"not found"}"  
+echo "  Name: ${user_name:-"not found"}"
+```
+
+**Validation:**
 - Validate project-name: alphanumeric, dashes, underscores only
-- Validate github-username: no spaces, valid GitHub username format
-- Validate email: basic email format check
-- Validate user-name: not empty
+- If GitHub username missing and not provided: prompt for it
+- If email missing and not provided: prompt for it
+- If name missing and not provided: prompt for it
 - If --from-idea provided: validate idea file exists and is readable
 
 ### 2. Setup Git Config

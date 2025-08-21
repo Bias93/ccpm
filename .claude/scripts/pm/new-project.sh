@@ -1,24 +1,84 @@
 #!/bin/bash
 
 # New Project Setup Script
-# Usage: bash .claude/scripts/pm/new-project.sh <project-name> <github-username> <user-email> <user-name> [--from-idea <idea-file>]
+# Usage: bash .claude/scripts/pm/new-project.sh <project-name> [--github-user <user>] [--email <email>] [--name <name>] [--from-idea <file>]
 
 PROJECT_NAME="$1"
-GITHUB_USERNAME="$2"
-USER_EMAIL="$3"
-USER_NAME="$4"
-
-# Parse optional --from-idea flag
+GITHUB_USERNAME=""
+USER_EMAIL=""
+USER_NAME=""
 IDEA_FILE=""
-if [ "$5" = "--from-idea" ] && [ -n "$6" ]; then
-    IDEA_FILE="$6"
-fi
+
+# Parse arguments
+shift # Remove project name
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --github-user)
+            GITHUB_USERNAME="$2"
+            shift 2
+            ;;
+        --email)
+            USER_EMAIL="$2"
+            shift 2
+            ;;
+        --name)
+            USER_NAME="$2"
+            shift 2
+            ;;
+        --from-idea)
+            IDEA_FILE="$2"
+            shift 2
+            ;;
+        *)
+            echo "❌ Unknown option: $1"
+            echo "Usage: /pm:new-project <project-name> [--github-user <user>] [--email <email>] [--name <name>] [--from-idea <file>]"
+            exit 1
+            ;;
+    esac
+done
 
 # Validation
-if [ -z "$PROJECT_NAME" ] || [ -z "$GITHUB_USERNAME" ] || [ -z "$USER_EMAIL" ] || [ -z "$USER_NAME" ]; then
-    echo "❌ Usage: /pm:new-project <project-name> <github-username> <user-email> <user-name> [--from-idea <idea-file>]"
-    echo "   Example: /pm:new-project my-app davide123 davide@example.com \"Davide Rossi\""
-    echo "   With idea: /pm:new-project my-app davide123 davide@example.com \"Davide Rossi\" --from-idea IDEA.md"
+if [ -z "$PROJECT_NAME" ]; then
+    echo "❌ Usage: /pm:new-project <project-name> [options]"
+    echo "   Example: /pm:new-project my-app"
+    echo "   With options: /pm:new-project my-app --github-user Bias93 --from-idea IDEA.md"
+    exit 1
+fi
+
+# Auto-detect git configuration if not provided
+if [ -z "$GITHUB_USERNAME" ]; then
+    GITHUB_USERNAME=$(git config --get user.github 2>/dev/null || git config --get github.user 2>/dev/null || "")
+    if [ -z "$GITHUB_USERNAME" ]; then
+        GITHUB_USERNAME=$(git config --get remote.origin.url 2>/dev/null | sed -n 's/.*github.com[:/]\([^/]*\).*/\1/p' || "")
+    fi
+fi
+
+if [ -z "$USER_EMAIL" ]; then
+    USER_EMAIL=$(git config user.email 2>/dev/null || "")
+fi
+
+if [ -z "$USER_NAME" ]; then
+    USER_NAME=$(git config user.name 2>/dev/null || "")
+fi
+
+echo "🔍 Configuration detection:"
+echo "  GitHub user: ${GITHUB_USERNAME:-"❌ not found"}"
+echo "  Email: ${USER_EMAIL:-"❌ not found"}"  
+echo "  Name: ${USER_NAME:-"❌ not found"}"
+
+# Check required parameters
+if [ -z "$GITHUB_USERNAME" ]; then
+    echo "❌ GitHub username required. Use --github-user option or set git config user.github"
+    exit 1
+fi
+
+if [ -z "$USER_EMAIL" ]; then
+    echo "❌ Email required. Use --email option or set git config user.email"
+    exit 1
+fi
+
+if [ -z "$USER_NAME" ]; then
+    echo "❌ Name required. Use --name option or set git config user.name"
     exit 1
 fi
 
