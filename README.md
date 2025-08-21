@@ -380,14 +380,16 @@ Teams using this system report:
 
 ## Get Started Now
 
-### Quick Setup (2 minutes)
+### For Existing Projects (2 minutes)
 
-1. **Clone this repository into your project**:
+1. **Clone this enhanced repository into your project**:
    ```bash
    cd path/to/your/project/
-   git clone https://github.com/automazeio/ccpm.git .
+   git clone https://github.com/TUO-USERNAME/ccpm.git .
    ```
    > ⚠️ **IMPORTANT**: If you already have a `.claude` directory, clone this repository to a different directory and copy the contents of the cloned `.claude` directory to your project's `.claude` directory.
+   > 
+   > 📝 **NOTE**: This is an enhanced fork with improved new-project support and fixed initialization scripts.
 
 2. **Initialize the PM system**:
    ```bash
@@ -411,9 +413,69 @@ Teams using this system report:
    /context:create
    ```
 
+5. **Start Your First Feature**:
+   ```bash
+   /pm:prd-new your-feature-name
+   ```
 
+### For Brand New Projects (5 minutes)
 
-### Start Your First Feature
+Starting from just an idea? Here's the complete workflow:
+
+1. **Create and setup project**:
+   ```bash
+   mkdir my-new-project
+   cd my-new-project
+   git init
+   
+   # Clone enhanced CCPM system
+   git clone https://github.com/TUO-USERNAME/ccpm.git .
+   
+   # IMPORTANT: Fix git remote to point to YOUR repository
+   git remote remove origin
+   git remote add origin https://github.com/username/my-new-project.git
+   
+   # Make initial commit
+   git add .
+   git commit -m "Initial commit with CCPM system"
+   git push -u origin main
+   ```
+
+2. **Initialize PM system**:
+   ```bash
+   /pm:init
+   ```
+
+3. **Create project context**:
+   ```bash
+   /context:create
+   ```
+
+4. **Create project foundation PRD**:
+   ```bash
+   /pm:prd-new project-foundation
+   ```
+   This PRD will cover:
+   - Project vision and goals
+   - Core architecture decisions
+   - Tech stack selection
+   - Initial feature set
+   - Setup requirements
+
+5. **Transform idea into technical plan**:
+   ```bash
+   /pm:prd-parse project-foundation
+   ```
+
+6. **Bootstrap your project**:
+   ```bash
+   /pm:epic-oneshot project-foundation
+   /pm:issue-start 1234  # First setup task
+   ```
+
+The system will help you go from idea → PRD → technical plan → working codebase.
+
+### Start Your First Feature (Existing Projects)
 
 ```bash
 /pm:prd-new your-feature-name
@@ -454,13 +516,27 @@ Watch as structured planning transforms into shipped code.
 
 ---
 
+## Contributing to This Enhanced Fork
+
+This is an enhanced version of the original CCPM with improvements for new projects and fixed initialization scripts.
+
+**Original project**: [automazeio/ccpm](https://github.com/automazeio/ccpm) by [@aroussi](https://x.com/aroussi)
+
+**Enhancements in this fork**:
+- Fixed `/pm:init` script for automatic setup without sudo
+- Added complete workflow for brand new projects  
+- Enhanced error handling and validation
+- Project foundation PRD template
+- Improved git remote handling
+
 ## Support This Project
 
 Claude Code PM was developed at [Automaze](https://automaze.io) **for developers who ship, by developers who ship**.
 
 If Claude Code PM helps your team ship better software:
 
-- ⭐ **[Star this repository](https://github.com/your-username/claude-code-pm)** to show your support
+- ⭐ **[Star the original repository](https://github.com/automazeio/ccpm)** to support the creator
+- ⭐ **[Star this enhanced fork](https://github.com/TUO-USERNAME/ccpm)** for the improvements
 - 🐦 **[Follow @aroussi on X](https://x.com/aroussi)** for updates and tips
 
 
