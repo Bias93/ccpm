@@ -153,6 +153,30 @@ if bash .claude/scripts/pm/init.sh; then
     echo "  ✅ CCPM system initialized successfully"
 else
     echo "  ⚠️ CCPM initialization had some issues - check output above"
+    
+    # Ensure critical setup still happens even if init.sh fails
+    echo ""
+    echo "🔧 Completing essential setup..."
+    
+    # Create directories
+    mkdir -p .claude/{prds,epics,context,rules,agents,scripts/pm}
+    echo "  ✅ Created required directories"
+    
+    # Update .gitignore regardless of init.sh status
+    if [ ! -f ".gitignore" ]; then
+        touch .gitignore
+        echo "  📄 Created .gitignore file"
+    fi
+    
+    if ! grep -q ".claude/epics" .gitignore; then
+        echo "" >> .gitignore
+        echo "# Claude Code PM" >> .gitignore
+        echo ".claude/epics/" >> .gitignore
+        echo ".claude/context/cache/" >> .gitignore
+        echo "  ✅ Updated .gitignore with CCPM entries"
+    else
+        echo "  ✅ .gitignore already has CCPM entries"
+    fi
 fi
 
 # 5. Process Idea File (if provided)
@@ -283,13 +307,32 @@ echo "🎯 Next Steps:"
 echo "1. Create GitHub repository: https://github.com/new"
 echo "   Repository name: $PROJECT_NAME"
 echo "2. Push initial commit: git push -u origin main"
-echo "3. Create project context: /context:create"
+echo ""
+echo "📋 If CCPM setup had issues, complete manually:"
+echo "   • Install GitHub CLI: https://cli.github.com/"
+echo "   • Authenticate: gh auth login --web"
+echo "   • Install extension: gh extension install yahsan2/gh-sub-issue"
+echo "   • Verify .gitignore includes .claude/epics/ and .claude/context/cache/"
+echo ""
+echo "3. Create project CLAUDE.md:"
+echo "   /init include rules from .claude/CLAUDE.md"
+echo ""
+echo "4. Create project context:"
+echo "   /context:create"
+echo ""
 
 if [ -n "$IDEA_FILE" ]; then
-    echo "4. Continue with implementation plan: /pm:prd-parse project-foundation"
-    echo "5. Then: /pm:epic-oneshot project-foundation"
+    echo "5. Continue with implementation plan:"
+    echo "   /pm:prd-parse project-foundation"
+    echo "   /pm:epic-oneshot project-foundation"
+    echo "   /pm:issue-start 1234  # First setup task"
 else
-    echo "4. Start with foundation PRD: /pm:prd-new project-foundation"
+    echo "5. Start with foundation PRD:"
+    echo "   /pm:prd-new project-foundation"
+    echo "   # Then continue with technical plan:"
+    echo "   /pm:prd-parse project-foundation"
+    echo "   /pm:epic-oneshot project-foundation"
+    echo "   /pm:issue-start 1234  # First setup task"
 fi
 
 echo ""

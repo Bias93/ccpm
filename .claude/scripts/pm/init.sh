@@ -89,10 +89,24 @@ if gh auth status &> /dev/null; then
   echo "  ✅ GitHub authenticated"
 else
   echo "  ⚠️ GitHub not authenticated"
-  echo "  Running: gh auth login"
-  if ! gh auth login; then
+  echo "  🔑 Starting authentication process..."
+  echo "  Please complete authentication in your browser"
+  
+  # Use web-based authentication to avoid password issues
+  if ! gh auth login --web; then
     echo "  ❌ GitHub authentication failed"
-    echo "  Please run 'gh auth login' manually"
+    echo ""
+    echo "  📋 Manual Steps Required:"
+    echo "  1. Install GitHub CLI (if needed): https://cli.github.com/"
+    echo "  2. Authenticate with GitHub: gh auth login --web"
+    echo "  3. Install gh-sub-issue extension: gh extension install yahsan2/gh-sub-issue"
+    echo "  4. Create required directories manually:"
+    echo "     mkdir -p .claude/{prds,epics,context,rules,agents,scripts/pm}"
+    echo "  5. Update .gitignore manually:"
+    echo "     echo '.claude/epics/' >> .gitignore"
+    echo "     echo '.claude/context/cache/' >> .gitignore"
+    echo ""
+    echo "  🔄 Then run: /pm:init again"
     exit 1
   fi
   echo "  ✅ GitHub authentication completed"
@@ -129,6 +143,7 @@ echo ""
 echo "📝 Updating .gitignore..."
 if [ ! -f ".gitignore" ]; then
   touch .gitignore
+  echo "  📄 Created new .gitignore file"
 fi
 
 # Add CCPM entries to .gitignore if not present
@@ -137,9 +152,19 @@ if ! grep -q ".claude/epics" .gitignore; then
   echo "# Claude Code PM" >> .gitignore
   echo ".claude/epics/" >> .gitignore
   echo ".claude/context/cache/" >> .gitignore
-  echo "  ✅ .gitignore updated"
+  echo "  ✅ .gitignore updated with CCMP entries"
 else
   echo "  ✅ .gitignore already configured"
+fi
+
+# Verify .gitignore content
+if grep -q ".claude/epics" .gitignore && grep -q ".claude/context/cache" .gitignore; then
+  echo "  ✅ .gitignore verification passed"
+else
+  echo "  ⚠️ .gitignore verification failed - entries may not have been added correctly"
+  echo "  📋 Manual fix: Add these lines to .gitignore:"
+  echo "     .claude/epics/"
+  echo "     .claude/context/cache/"
 fi
 
 # Copy scripts if in main repo

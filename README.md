@@ -444,11 +444,10 @@ git push -u origin main
 ```bash
 mkdir my-new-project
 cd my-new-project
-
-# Write down your raw idea
-echo "My app idea: A tool that helps developers..." > IDEA.md
-
 git clone https://github.com/Bias93/ccpm.git .
+
+# Write down your raw idea after cloning
+echo "My app idea: A tool that helps developers..." > IDEA.md
 
 # Setup with idea processing:
 /pm:new-project my-new-project --from-idea IDEA.md
