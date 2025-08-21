@@ -385,7 +385,7 @@ Teams using this system report:
 1. **Clone this enhanced repository into your project**:
    ```bash
    cd path/to/your/project/
-   git clone https://github.com/TUO-USERNAME/ccpm.git .
+   git clone https://github.com/Bias93/ccpm.git .
    ```
    > ⚠️ **IMPORTANT**: If you already have a `.claude` directory, clone this repository to a different directory and copy the contents of the cloned `.claude` directory to your project's `.claude` directory.
    > 
@@ -418,58 +418,105 @@ Teams using this system report:
    /pm:prd-new your-feature-name
    ```
 
-### For Brand New Projects (5 minutes)
+### For Brand New Projects (2 minutes)
 
-Starting from just an idea? Here's the complete workflow:
+Starting from just an idea? Use the automated setup:
 
-1. **Create and setup project**:
+#### **Option A: Automated Setup (Recommended)**
+
+**From scratch:**
+```bash
+mkdir my-new-project
+cd my-new-project
+git init
+git clone https://github.com/Bias93/ccpm.git .
+
+# One command does everything:
+/pm:new-project my-new-project your-github-username your-email@example.com "Your Name"
+
+# Then create GitHub repo and push:
+git push -u origin main
+```
+
+**From an idea file:**
+```bash
+mkdir my-new-project
+cd my-new-project
+
+# Write down your raw idea
+echo "My app idea: A tool that helps developers..." > IDEA.md
+
+git init
+git clone https://github.com/Bias93/ccpm.git .
+
+# Setup with idea processing:
+/pm:new-project my-new-project your-github-username your-email@example.com "Your Name" --from-idea IDEA.md
+
+# Then create GitHub repo and push:
+git push -u origin main
+```
+
+This command automatically:
+- Configures git identity
+- Fixes git remote to point to YOUR repository  
+- Updates README with your details
+- Initializes CCPM system
+- **If idea file provided**: Creates project-foundation PRD from your idea
+- Creates initial commit
+
+#### **Option B: Manual Setup**
+```bash
+mkdir my-new-project
+cd my-new-project
+git init
+
+# Clone enhanced CCPM system
+git clone https://github.com/Bias93/ccpm.git .
+
+# Configure git
+git config user.email "your-email@example.com"
+git config user.name "Your Name"
+
+# Fix git remote to point to YOUR repository
+git remote remove origin
+git remote add origin https://github.com/username/my-new-project.git
+
+# Make initial commit
+git add .
+git commit -m "Initial commit with CCMP system"
+git push -u origin main
+
+# Initialize PM system
+/pm:init
+```
+
+#### **Continue with project setup:**
+
+1. **Create project CLAUDE.md**:
    ```bash
-   mkdir my-new-project
-   cd my-new-project
-   git init
-   
-   # Clone enhanced CCPM system
-   git clone https://github.com/TUO-USERNAME/ccpm.git .
-   
-   # IMPORTANT: Fix git remote to point to YOUR repository
-   git remote remove origin
-   git remote add origin https://github.com/username/my-new-project.git
-   
-   # Make initial commit
-   git add .
-   git commit -m "Initial commit with CCPM system"
-   git push -u origin main
+   /init include rules from .claude/CLAUDE.md
    ```
 
-2. **Initialize PM system**:
-   ```bash
-   /pm:init
-   ```
-
-3. **Create project context**:
+2. **Create project context**:
    ```bash
    /context:create
    ```
 
-4. **Create project foundation PRD**:
+3. **If you used --from-idea**:
    ```bash
-   /pm:prd-new project-foundation
-   ```
-   This PRD will cover:
-   - Project vision and goals
-   - Core architecture decisions
-   - Tech stack selection
-   - Initial feature set
-   - Setup requirements
-
-5. **Transform idea into technical plan**:
-   ```bash
+   # Your PRD is already created, continue with technical plan:
    /pm:prd-parse project-foundation
+   /pm:epic-oneshot project-foundation
+   /pm:issue-start 1234  # First setup task
    ```
 
-6. **Bootstrap your project**:
+4. **If you didn't use --from-idea**:
    ```bash
-   /pm:epic-oneshot project-foundation
+   # Create project foundation PRD manually:
+   /pm:prd-new project-foundation
+   # Then continue with technical plan:
+   /pm:prd-parse project-foundation
+   /pm:epic-oneshot project-foundation  
    /pm:issue-start 1234  # First setup task
    ```
 
@@ -536,7 +583,7 @@ Claude Code PM was developed at [Automaze](https://automaze.io) **for developers
 If Claude Code PM helps your team ship better software:
 
 - ⭐ **[Star the original repository](https://github.com/automazeio/ccpm)** to support the creator
-- ⭐ **[Star this enhanced fork](https://github.com/TUO-USERNAME/ccpm)** for the improvements
+- ⭐ **[Star this enhanced fork](https://github.com/Bias93/ccpm)** for the improvements
 - 🐦 **[Follow @aroussi on X](https://x.com/aroussi)** for updates and tips
 
 

@@ -170,29 +170,69 @@ else
   echo "  Initialize with: git init"
 fi
 
-# Create CLAUDE.md if it doesn't exist
+# Create project-specific CLAUDE.md
+echo ""
+echo "📄 Setting up CLAUDE.md..."
 if [ ! -f "CLAUDE.md" ]; then
-  echo ""
-  echo "📄 Creating CLAUDE.md..."
+  echo "  📝 Creating project-specific CLAUDE.md template..."
+  
+  # Create comprehensive project template
   cat > CLAUDE.md << 'EOF'
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 > Think carefully and implement the most concise solution that changes as little code as possible.
 
-## Project-Specific Instructions
+## Project Overview
 
-Add your project-specific instructions here.
+[Describe what this project does and its main purpose]
 
-## Testing
+## Architecture
 
-Always run tests before committing:
-- `npm test` or equivalent for your stack
+[Describe the key architectural decisions and patterns used]
 
-## Code Style
+## Development Setup
 
-Follow existing patterns in the codebase.
+[How to set up the development environment]
+```bash
+# Example setup commands
+git clone <repo>
+cd <project>
+npm install  # or equivalent
+```
+
+## Testing Strategy
+
+[Describe testing approach and commands]
+- Run all tests: `[your test command]`
+- Run specific test: `[command for single test]`
+- Test coverage: `[coverage command]`
+
+## Build & Deployment
+
+[How to build and deploy this project]
+- Build: `[build command]`
+- Deploy: `[deploy command]`
+
+## Code Style & Conventions
+
+[Project-specific coding standards]
+- File naming: [convention]
+- Function naming: [convention]
+- Code organization: [structure]
+
+## Important Notes
+
+[Critical project-specific information]
+- [Important gotcha or consideration]
+- [Special requirements or constraints]
 EOF
-  echo "  ✅ CLAUDE.md created"
+  echo "  ✅ CLAUDE.md created with project template"
+  echo "  💡 Tip: Run '/init include rules from .claude/CLAUDE.md' to add CCPM rules"
+else
+  echo "  ✅ CLAUDE.md already exists"
+  echo "  💡 Tip: Run '/re-init' to integrate latest CCPM rules"
 fi
 
 # Summary
