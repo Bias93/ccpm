@@ -20,7 +20,7 @@ Agent performs entire validation autonomously using WebSearch and WebFetch.
 </commentary>
 </example>
 tools: WebSearch, WebFetch, Read, Write
-model: opus
+model: inherit
 color: blue
 ---
 
