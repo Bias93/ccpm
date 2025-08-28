@@ -56,25 +56,25 @@ graph LR
     D --> E[Parallel Execution]
 ```
 
-### See It In Action (60 seconds)
+### Complete Workflow (32 minutes)
 
 ```bash
-# ✨ NEW: Automated idea validation (18 minutes, zero interaction)
+# 1. Validate your idea (18 min, fully automated)
 /pm:validate-idea IDEA.md
-# → Generates: VALIDATED-IDEA.md with market research & GO/NO-GO decision
+# → Generates: VALIDATED-IDEA.md with GO/NO-GO decision
 
-# Setup project (if validation = GO)
-/pm:new-project memory-system
+# 2. Setup project structure (2 min)
+/pm:new-project my-project
 
-# Create comprehensive PRD from validated research
-/pm:prd-new memory-system --from-idea VALIDATED-IDEA.md
+# 3. Create comprehensive PRD from validated research (8 min)
+/pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md
 
-# Transform PRD into a technical epic with task breakdown
-/pm:prd-parse memory-system
+# 4. Transform PRD into technical implementation plan (4 min)
+/pm:prd-parse project-foundation
+/pm:epic-oneshot project-foundation
 
-# Push to GitHub and start parallel execution
-/pm:epic-oneshot memory-system
-/pm:issue-start 1235
+# 5. Start parallel development
+/pm:issue-start 1234
 ```
 
 ## What Makes This Different?
@@ -372,191 +372,127 @@ Teams using this system report:
 ## Example Flow
 
 ```bash
-# Start a new feature
-/pm:prd-new memory-system
+# Start with idea validation
+echo "AI coding assistant for mobile apps" > IDEA.md
+/pm:validate-idea IDEA.md
+# → Generates market research and GO/NO-GO decision
 
-# Review and refine the PRD...
+# Setup new project structure
+/pm:new-project mobile-ai-assistant
 
-# Create implementation plan
-/pm:prd-parse memory-system
+# Create PRD from validated research
+/pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md
+# → Comprehensive product requirements
 
-# Review the epic...
+# Generate technical implementation plan
+/pm:prd-parse project-foundation
+# → Technical architecture and approach
 
-# Break into tasks and push to GitHub
-/pm:epic-oneshot memory-system
+# Push to GitHub and start parallel development
+/pm:epic-oneshot project-foundation
 # Creates issues: #1234 (epic), #1235, #1236 (tasks)
 
-# Start development on a task
+# Begin implementation
 /pm:issue-start 1235
-# Agent begins work, maintains local progress
+# Specialized agent begins work
 
-# Sync progress to GitHub
-/pm:issue-sync 1235
-# Updates posted as issue comments
-
-# Check overall status
-/pm:epic-show memory-system
+# Monitor progress
+/pm:epic-show project-foundation
 ```
 
-## Get Started Now
+## Get Started
 
-### For Existing Projects (2 minutes)
+> 📖 **Quick Reference**: See [QUICKSTART-GUIDE.md](QUICKSTART-GUIDE.md) for a condensed guide
 
-1. **Clone this enhanced repository into your project**:
-   ```bash
-   cd path/to/your/project/
-   git clone https://github.com/Bias93/ccpm.git .
-   ```
-   > ⚠️ **IMPORTANT**: If you already have a `.claude` directory, clone this repository to a different directory and copy the contents of the cloned `.claude` directory to your project's `.claude` directory.
-   > 
-   > 📝 **NOTE**: This is an enhanced fork with improved new-project support and fixed initialization scripts.
+### Prerequisites
 
-2. **Initialize the PM system**:
-   ```bash
-   /pm:init
-   ```
-   This command will:
-   - Install GitHub CLI (if needed)
-   - Authenticate with GitHub
-   - Install [gh-sub-issue extension](https://github.com/yahsan2/gh-sub-issue) for proper parent-child relationships
-   - Create required directories
-   - Update .gitignore
+- **Claude Code** - This system runs as commands within Claude Code
+- **Git** - For version control
+- **GitHub CLI** (optional) - Automatically installed by `/pm:init`
 
-3. **Create `CLAUDE.md`** with your repository information
-   ```bash
-   /init include rules from .claude/CLAUDE.md
-   ```
-   > If you already have a `CLAUDE.md` file, run: `/re-init` to update it with important rules from `.claude/CLAUDE.md`.
+Choose your scenario:
 
-4. **Analyze existing project** (for projects with existing code):
-   ```bash
-   /context:create
-   ```
+### 🚀 Starting a New Project from an Idea
 
-5. **Start Your First Feature**:
-   ```bash
-   /pm:prd-new your-feature-name
-   ```
+**Full automated workflow (32 minutes):**
 
-### For Brand New Projects (2 minutes)
-
-Starting from just an idea? Use the automated setup:
-
-#### **Option A: Automated Setup (Recommended)**
-
-**From scratch:**
 ```bash
-mkdir my-new-project
-cd my-new-project
+# 1. Clone CCPM system
+mkdir my-project && cd my-project
 git clone https://github.com/Bias93/ccpm.git .
 
-# Simple setup (uses your existing git config):
-/pm:new-project my-new-project
+# 2. Write your idea
+echo "My app idea: A platform that..." > IDEA.md
 
-# Or with GitHub username override:
-/pm:new-project my-new-project --github-user your-github-username
+# 3. Validate idea (18 min, fully automated)
+/pm:validate-idea IDEA.md
 
-# Then create GitHub repo and push:
-git push -u origin main
+# 4. Setup project (2 min)
+/pm:new-project my-project
+
+# 5. Create PRD from validated idea (8 min)
+/pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md
+
+# 6. Generate technical plan (4 min)
+/pm:prd-parse project-foundation
+/pm:epic-oneshot project-foundation
+
+# 7. Start development
+/pm:issue-start 1234
 ```
 
-**From an idea file:**
+### 🏢 Adding CCPM to Existing Project
+
+**Simple integration (5 minutes):**
+
 ```bash
-mkdir my-new-project
-cd my-new-project
-git clone https://github.com/Bias93/ccpm.git .
+# 1. Install CCPM
+cd your-existing-project/
+git clone https://github.com/Bias93/ccpm.git temp-ccpm
+cp -r temp-ccpm/.claude ./ && rm -rf temp-ccpm
 
-# Write down your raw idea after cloning
-echo "My app idea: A tool that helps developers..." > IDEA.md
-
-# Setup with idea processing:
-/pm:new-project my-new-project --from-idea IDEA.md
-
-# Then create GitHub repo and push:
-git push -u origin main
-```
-
-This command automatically:
-- **Auto-detects** your git configuration (email, name, GitHub username)
-- **Only prompts** for missing information
-- Fixes git remote to point to YOUR repository  
-- Updates README with your details
-- Initializes CCPM system
-- **If idea file provided**: Creates project-foundation PRD from your idea
-- Creates initial commit
-
-#### **Option B: Manual Setup**
-```bash
-mkdir my-new-project
-cd my-new-project
-git init
-
-# Clone enhanced CCPM system
-git clone https://github.com/Bias93/ccpm.git .
-
-# Configure git
-git config user.email "your-email@example.com"
-git config user.name "Your Name"
-
-# Fix git remote to point to YOUR repository
-git remote remove origin
-git remote add origin https://github.com/username/my-new-project.git
-
-# Make initial commit
-git add .
-git commit -m "Initial commit with CCMP system"
-git push -u origin main
-
-# Initialize PM system
+# 2. Initialize system
 /pm:init
-```
 
-#### **Continue with project setup:**
+# 3. Create project context
+/init include rules from .claude/CLAUDE.md
+/context:create
 
-1. **Create project CLAUDE.md**:
-   ```bash
-   /init include rules from .claude/CLAUDE.md
-   ```
-
-2. **Create project foundation PRD with guided brainstorming**:
-   ```bash
-   # If you used --from-idea (enhanced brainstorming from your idea):
-   /pm:prd-new project-foundation --from-idea IDEA.md
-   
-   # If you didn't use --from-idea (fresh brainstorming):
-   /pm:prd-new project-foundation
-   ```
-
-3. **Create technical implementation plan**:
-   ```bash
-   /pm:prd-parse project-foundation
-   /pm:epic-oneshot project-foundation
-   ```
-
-4. **Start implementing basic project structure**:
-   ```bash
-   /pm:issue-start 1234  # First setup task
-   # Implement 2-3 initial tasks to create:
-   # - package.json/dependencies
-   # - Basic project structure  
-   # - Core architecture decisions
-   ```
-
-5. **Create project context** (after some concrete implementation):
-   ```bash
-   /context:create
-   ```
-   > **Note**: Context creation is more effective after implementing basic project structure, as it can analyze actual code, dependencies, and architectural decisions rather than just intentions.
-
-The system will help you go from idea → PRD → technical plan → working codebase.
-
-### Start Your First Feature (Existing Projects)
-
-```bash
+# 4. Start first feature
 /pm:prd-new your-feature-name
 ```
 
-Watch as structured planning transforms into shipped code.
+### 🎯 Just Validate an Idea
+
+**Research-only workflow (18 minutes):**
+
+```bash
+# Clone anywhere temporarily
+git clone https://github.com/Bias93/ccpm.git temp-validation
+cd temp-validation
+
+# Write your idea
+echo "My idea: An AI tool that..." > IDEA.md
+
+# Get automated validation report
+/pm:validate-idea IDEA.md
+# → Generates VALIDATED-IDEA.md with GO/NO-GO decision
+
+# Review results and decide
+cat VALIDATED-IDEA.md
+```
+
+### What Happens Next?
+
+- **New projects**: Your repository is ready with clean structure
+- **Existing projects**: CCPM integrates without disrupting your code  
+- **Idea validation**: You get evidence-based GO/NO-GO decision with market research
+
+### Need Help?
+
+- **Commands**: Type `/pm:help` for full command reference
+- **Issues**: Check [GitHub Issues](https://github.com/Bias93/ccpm/issues)
+- **Quick Guide**: See [QUICKSTART-GUIDE.md](QUICKSTART-GUIDE.md)
 
 ## Local vs Remote
 
