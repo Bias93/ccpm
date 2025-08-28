@@ -205,9 +205,10 @@ echo "  ✅ Created clean project README.md"
 echo ""
 echo "🧹 Cleaning up CCPM-specific files..."
 rm -f LICENSE  # Remove CCPM license
-rm -f screenshot.webp  # Remove CCPM screenshot
-echo "  ✅ Removed CCPM license and assets"
-echo "  📝 Note: Add your own LICENSE file if needed"
+rm -f screenshot.webp  # Remove CCPM screenshot  
+rm -f QUICKSTART-GUIDE.md  # Remove CCPM guide
+echo "  ✅ Removed CCPM license, screenshot, and documentation"
+echo "  📝 Creating clean project structure for your codebase..."
 
 # 5. Initialize CCPM System  
 echo ""
