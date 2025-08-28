@@ -52,8 +52,8 @@ Before proceeding, complete these validation steps:
    - Only proceed with explicit 'yes' confirmation
 
 4. **Verify template availability:**
-   - Check if `.claude/templates/validated-idea.md` exists
-   - If not found: "❌ Template not found. Please ensure .claude/templates/validated-idea.md exists"
+   - Check if `./.claude/templates/validated-idea.md` exists in current directory
+   - If not found: "❌ Template not found. Please ensure ./.claude/templates/validated-idea.md exists in your project"
 
 ## Instructions
 

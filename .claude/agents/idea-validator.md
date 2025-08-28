@@ -188,6 +188,10 @@ Generate complete `VALIDATED-IDEA.md` file containing:
 
 ## **OUTPUT FORMAT REQUIREMENTS**
 
+Use the template from `./.claude/templates/validated-idea.md` in your current project directory to structure the output. The template includes important frontmatter metadata and standardized sections.
+
+If template is not available, use this fallback structure:
+
 ```markdown
 # VALIDATED-IDEA.md Structure
 
