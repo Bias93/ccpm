@@ -176,9 +176,11 @@ This project uses Claude Code PM for project management and development workflow
 
 ### Quick Start
 
-1. Set up project context: \`/context:create\`
-2. Create your first PRD: \`/pm:prd-new project-foundation\`
-3. View available commands: \`/pm:help\`
+1. Validate your idea: \`echo 'My idea: ...' > IDEA.md && /pm:validate-idea IDEA.md\`
+2. Create PRD from research: \`/pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md\`
+3. Generate technical plan: \`/pm:prd-parse project-foundation && /pm:epic-oneshot project-foundation\`
+4. Set up project context: \`/context:create\` (after implementing basic structure)
+5. View available commands: \`/pm:help\`
 
 ### CCPM Documentation
 
@@ -361,23 +363,28 @@ echo "   /init include rules from .claude/CLAUDE.md"
 echo ""
 
 if [ -n "$IDEA_FILE" ]; then
-    echo "4. Create PRD from your idea with guided brainstorming:"
-    echo "   /pm:prd-new project-foundation --from-idea $IDEA_FILE"
+    echo "4. Validate your idea (18 min, fully automated):"
+    echo "   /pm:validate-idea $IDEA_FILE"
+    echo "5. Create PRD from validated research:"
+    echo "   /pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md"
 else
-    echo "4. Create foundation PRD with guided brainstorming:"
-    echo "   /pm:prd-new project-foundation"
+    echo "4. Create idea file and validate (18 min automated):"
+    echo "   echo 'My idea: ...' > IDEA.md"
+    echo "   /pm:validate-idea IDEA.md"
+    echo "5. Create PRD from validated research:"
+    echo "   /pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md"
 fi
 
 echo ""
-echo "5. Create technical implementation plan:"
+echo "6. Create technical implementation plan:"
 echo "   /pm:prd-parse project-foundation"
 echo "   /pm:epic-oneshot project-foundation"
 echo ""
-echo "6. Start implementing basic project structure:"
+echo "7. Start implementing basic project structure:"
 echo "   /pm:issue-start 1234  # First setup task"
 echo "   # Implement 2-3 initial tasks (package.json, structure, etc.)"
 echo ""
-echo "7. Create project context (after some implementation):"
+echo "8. Create project context (after some implementation):"
 echo "   /context:create"
 echo "   # Note: More effective after implementing basic structure"
 

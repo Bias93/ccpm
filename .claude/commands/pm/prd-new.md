@@ -13,7 +13,7 @@ Launch brainstorming for new product requirement document.
 ```
 
 ### Options
-- `--from-idea <file>`: Start brainstorming with an existing idea file as context
+- `--from-idea <file>`: Start brainstorming with an existing idea file as context (typically VALIDATED-IDEA.md from /pm:validate-idea)
 
 ## Required Rules
 
@@ -72,13 +72,16 @@ Follow this structured approach:
 
 ### 2. Discovery & Guided Brainstorming
 
-**For ideas from file:**
-- "Based on your idea, let me ask some clarifying questions to help structure this into a comprehensive PRD..."
-- Ask targeted questions that build on the existing idea:
-  - "Your idea mentions [specific aspect], who specifically would benefit from this?"
-  - "What specific problem does this solve that current solutions don't address?"
-  - "What would success look like for users of this feature?"
-  - Dig deeper into technical considerations mentioned or implied in the idea
+**For validated ideas from file (e.g., VALIDATED-IDEA.md):**
+- "Based on your validated idea and market research, let me ask some clarifying questions to help structure this into a comprehensive PRD..."
+- Build on the existing validation data:
+  - Use market research findings from the validation
+  - Reference competitive analysis insights
+  - Leverage user research and pain points already identified
+  - Ask targeted questions that build on validation results:
+    - "The validation shows [specific market need], how should we prioritize addressing this?"
+    - "Based on competitor analysis, what unique value proposition will differentiate us?"
+    - "The research identified [user segment], what specific features do they need most?"
 
 **For fresh features:**
 - Ask open-ended discovery questions:
@@ -181,9 +184,11 @@ Before saving the PRD, verify:
 
 After successfully creating the PRD:
 1. Confirm: "✅ PRD created: .claude/prds/$FEATURE_NAME.md"
-2. If idea file was used: "✅ Successfully expanded your initial idea into a comprehensive PRD"
+2. If idea file was used: "✅ Successfully expanded your validated idea into a comprehensive PRD"
 3. Show brief summary of what was captured
-4. Suggest next step: "Ready to create implementation epic? Run: /pm:prd-parse $FEATURE_NAME"
+4. Suggest next steps: 
+   - "Ready to create implementation epic? Run: /pm:prd-parse $FEATURE_NAME"
+   - "Then push to GitHub: /pm:epic-oneshot $FEATURE_NAME"
 
 ## Error Recovery
 

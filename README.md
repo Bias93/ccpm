@@ -488,6 +488,18 @@ cat VALIDATED-IDEA.md
 - **Existing projects**: CCPM integrates without disrupting your code  
 - **Idea validation**: You get evidence-based GO/NO-GO decision with market research
 
+### After Initial Implementation
+
+Once you've implemented 2-3 basic tasks (package.json, project structure, core files):
+
+```bash
+# Setup project-specific Claude rules
+/init include rules from .claude/CLAUDE.md
+
+# Create project context for better development
+/context:create
+```
+
 ### Need Help?
 
 - **Commands**: Type `/pm:help` for full command reference

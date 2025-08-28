@@ -155,9 +155,11 @@ echo "📝 Next: Run 'git push -u origin main' to push to GitHub"
 🎯 Next Steps:
 1. Create GitHub repository: https://github.com/new
 2. Push initial commit: git push -u origin main
-3. Create project context: /context:create
-4. {If idea file used}: Continue with: /pm:prd-parse project-foundation
-4. {If no idea file}: Start with foundation PRD: /pm:prd-new project-foundation
+3. {If idea file used}: Continue with: /pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md
+4. {If no idea file}: Validate your idea first: /pm:validate-idea IDEA.md, then /pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md
+5. Generate technical plan: /pm:prd-parse project-foundation && /pm:epic-oneshot project-foundation
+6. Start development: /pm:issue-start 1234
+7. After implementing 2-3 basic tasks: /init include rules from .claude/CLAUDE.md && /context:create
 
 📚 Documentation: README.md
 ```

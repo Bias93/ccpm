@@ -93,7 +93,7 @@ Chi lo usa: knowledge workers, studenti, ricercatori.
 
 ```bash
 # Brainstorming guidato usando validation data
-/pm:prd-new main-features --from-idea VALIDATED-IDEA.md
+/pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md
 ```
 
 **Cosa succede (interattivamente):**
@@ -102,7 +102,7 @@ Chi lo usa: knowledge workers, studenti, ricercatori.
 - 🎯 **Comprehensive PRD** - User journeys, acceptance criteria, success metrics
 - 📊 **Validation integration** - Market context popolato da research
 
-**Risultato:** `.claude/prds/main-features.md` completo e dettagliato.
+**Risultato:** `.claude/prds/project-foundation.md` completo e dettagliato.
 
 ---
 
@@ -110,8 +110,8 @@ Chi lo usa: knowledge workers, studenti, ricercatori.
 
 ```bash
 # Trasforma PRD in epic e GitHub Issues
-/pm:prd-parse main-features
-/pm:epic-oneshot main-features
+/pm:prd-parse project-foundation
+/pm:epic-oneshot project-foundation
 ```
 
 **Cosa succede:**
@@ -167,12 +167,12 @@ Knowledge base ricercabile." > IDEA.md
 # → Project setup ONLY (no PRD)
 
 # 4. Comprehensive PRD creation (10 min)
-/pm:prd-new main-features --from-idea VALIDATED-IDEA.md
+/pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md
 # → Brainstorming guidato + PRD dettagliato
 
 # 5. Epic e GitHub Issues (2 min)
-/pm:prd-parse main-features
-/pm:epic-oneshot main-features
+/pm:prd-parse project-foundation
+/pm:epic-oneshot project-foundation
 
 # 6. Push e development
 git push -u origin main
