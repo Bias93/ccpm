@@ -59,8 +59,15 @@ graph LR
 ### See It In Action (60 seconds)
 
 ```bash
-# Create a comprehensive PRD through guided brainstorming
-/pm:prd-new memory-system
+# ✨ NEW: Automated idea validation (18 minutes, zero interaction)
+/pm:validate-idea IDEA.md
+# → Generates: VALIDATED-IDEA.md with market research & GO/NO-GO decision
+
+# Setup project (if validation = GO)
+/pm:new-project memory-system
+
+# Create comprehensive PRD from validated research
+/pm:prd-new memory-system --from-idea VALIDATED-IDEA.md
 
 # Transform PRD into a technical epic with task breakdown
 /pm:prd-parse memory-system
@@ -74,6 +81,7 @@ graph LR
 
 | Traditional Development | Claude Code PM System |
 |------------------------|----------------------|
+| **Manual idea validation** | **✨ Automated validation** with 15+ web searches & lean startup framework |
 | Context lost between sessions | **Persistent context** across all work |
 | Serial task execution | **Parallel agents** on independent tasks |
 | "Vibe coding" from memory | **Spec-driven** with full traceability |
@@ -202,8 +210,17 @@ Specialized agents implement tasks while maintaining progress updates and an aud
 ### Initial Setup
 - `/pm:init` - Install dependencies and configure GitHub
 
-### PRD Commands
+### Idea Validation Commands ✨ NEW
+- `/pm:validate-idea <idea_file>` - **Transform raw idea into validated concept using fully automated AI-driven lean startup methodology**
+  - ⚡ **Autonomous validation** - Zero user interaction required  
+  - 🔍 **15+ web searches** - Market trends, competitive analysis, problem validation
+  - 📊 **Evidence-based scoring** - GO/NO-GO decisions with confidence levels
+  - ⏱️ **18-minute process** - Complete validation in under 20 minutes
+  - 📋 **Ready for PRD** - Output directly integrates with `/pm:prd-new`
+
+### PRD Commands  
 - `/pm:prd-new` - Launch brainstorming for new product requirement
+- `/pm:prd-new --from-idea <file>` - Enhanced brainstorming starting from raw idea file
 - `/pm:prd-parse` - Convert PRD to implementation epic
 - `/pm:prd-list` - List all PRDs
 - `/pm:prd-edit` - Edit existing PRD
@@ -335,8 +352,11 @@ Works with tools your team already uses. Issues are the source of truth, comment
 ### 🤖 **Agent Specialization**
 Right tool for every job. Different agents for UI, API, and database work. Each reads requirements and posts updates automatically.
 
+### 💡 **Idea-to-PRD Enhancement**
+Transform raw ideas into structured PRDs through guided brainstorming. `/pm:prd-new --from-idea` uses your initial concept as a foundation for comprehensive product planning, asking targeted questions to build complete requirements.
+
 ### 📊 **Full Traceability**
-Every decision is documented. PRD → Epic → Task → Issue → Code → Commit. Complete audit trail from idea to production.
+Every decision is documented. Idea → PRD → Epic → Task → Issue → Code → Commit. Complete audit trail from concept to production.
 
 ### 🚀 **Developer Productivity**
 Focus on building, not managing. Intelligent prioritization, automatic context loading, and incremental sync when ready.
@@ -408,7 +428,7 @@ Teams using this system report:
    ```
    > If you already have a `CLAUDE.md` file, run: `/re-init` to update it with important rules from `.claude/CLAUDE.md`.
 
-4. **Prime the system**:
+4. **Analyze existing project** (for projects with existing code):
    ```bash
    /context:create
    ```
@@ -498,28 +518,35 @@ git push -u origin main
    /init include rules from .claude/CLAUDE.md
    ```
 
-2. **Create project context**:
+2. **Create project foundation PRD with guided brainstorming**:
+   ```bash
+   # If you used --from-idea (enhanced brainstorming from your idea):
+   /pm:prd-new project-foundation --from-idea IDEA.md
+   
+   # If you didn't use --from-idea (fresh brainstorming):
+   /pm:prd-new project-foundation
+   ```
+
+3. **Create technical implementation plan**:
+   ```bash
+   /pm:prd-parse project-foundation
+   /pm:epic-oneshot project-foundation
+   ```
+
+4. **Start implementing basic project structure**:
+   ```bash
+   /pm:issue-start 1234  # First setup task
+   # Implement 2-3 initial tasks to create:
+   # - package.json/dependencies
+   # - Basic project structure  
+   # - Core architecture decisions
+   ```
+
+5. **Create project context** (after some concrete implementation):
    ```bash
    /context:create
    ```
-
-3. **If you used --from-idea**:
-   ```bash
-   # Your PRD is already created, continue with technical plan:
-   /pm:prd-parse project-foundation
-   /pm:epic-oneshot project-foundation
-   /pm:issue-start 1234  # First setup task
-   ```
-
-4. **If you didn't use --from-idea**:
-   ```bash
-   # Create project foundation PRD manually:
-   /pm:prd-new project-foundation
-   # Then continue with technical plan:
-   /pm:prd-parse project-foundation
-   /pm:epic-oneshot project-foundation  
-   /pm:issue-start 1234  # First setup task
-   ```
+   > **Note**: Context creation is more effective after implementing basic project structure, as it can analyze actual code, dependencies, and architectural decisions rather than just intentions.
 
 The system will help you go from idea → PRD → technical plan → working codebase.
 

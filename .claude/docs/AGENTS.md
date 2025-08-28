@@ -10,6 +10,18 @@ Specialized agents that do heavy work and return concise summaries to preserve c
 
 ## Available Agents
 
+### 🧠 `idea-validator`
+- **Purpose**: Fully automated idea validation using autonomous web research and lean startup methodology
+- **Pattern**: Read raw idea → Auto-generate research strategy → Execute 15+ web searches → Apply framework → Return validated concept
+- **Usage**: When you need to validate a business idea with zero user interaction
+- **Returns**: Complete VALIDATED-IDEA.md with GO/NO-GO decision, market research, competitive analysis, and strategic recommendations
+- **Features**:
+  - Zero user interaction required
+  - Autonomous web research (market trends, competitive intelligence, problem validation)
+  - Evidence-based scoring and decision framework
+  - 18-minute automated validation process
+  - Direct integration with PRD development workflow
+
 ### 🔍 `code-analyzer`
 - **Purpose**: Hunt bugs across multiple files without polluting main context
 - **Pattern**: Search many files → Analyze code → Return bug report
@@ -56,6 +68,12 @@ Agent reads 10 files → Main thread gets 1 summary → Context preserved
 ## Example Usage
 
 ```bash
+# Validating business ideas
+Task: "Validate this AI summarization tool idea"
+Agent: idea-validator
+Returns: "GO decision (8/10 confidence) - Market size 50K users, 3 competitors with gaps identified"
+Main thread never sees: 18 web searches, competitive analysis details, research methodology
+
 # Analyzing code for bugs
 Task: "Search for memory leaks in the codebase"
 Agent: code-analyzer
@@ -103,6 +121,10 @@ New agents should follow these principles:
 
 Agents integrate seamlessly with the PM command system:
 
+- `/pm:validate-idea` → Spawns idea-validator agent
+- idea-validator → Executes autonomous web research and analysis
+- `/pm:new-project` → Project setup and initialization
+- `/pm:prd-new --from-idea` → Uses validation results for comprehensive PRD creation
 - `/pm:issue-analyze` → Identifies work streams
 - `/pm:issue-start` → Spawns parallel-worker agent
 - parallel-worker → Spawns multiple sub-agents

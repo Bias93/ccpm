@@ -6,10 +6,41 @@ Complete reference of all commands available in the Claude Code PM system.
 
 ## Table of Contents
 
+- [Project Management Commands](#project-management-commands)
 - [Context Commands](#context-commands)
 - [Testing Commands](#testing-commands)
 - [Utility Commands](#utility-commands)
 - [Review Commands](#review-commands)
+
+## Project Management Commands
+
+Core PM commands for idea validation and PRD creation.
+
+### `/pm:validate-idea`
+- **Purpose**: Transform raw idea into validated concept using fully automated AI-driven lean startup methodology
+- **Usage**: `/pm:validate-idea <idea_file>`
+- **Description**: Executes completely autonomous validation with zero user interaction. Performs 15+ web searches across market trends, competitive analysis, problem validation, and solution demand. Generates evidence-based GO/NO-GO decisions with comprehensive research backing.
+- **Process**: 
+  - Phase 1 (2 min): Automated idea analysis + research keyword generation
+  - Phase 2 (15 min): Autonomous web research execution
+  - Phase 3 (1 min): Evidence synthesis + lean startup framework application
+- **Output**: `VALIDATED-IDEA.md` with complete market research, competitive analysis, and strategic recommendations
+- **Features**:
+  - Zero user interaction required
+  - 15-20 automated web searches
+  - Evidence-based scoring (1-10 scale)
+  - GO/NO-GO decision with confidence levels
+  - Ready for PRD development integration
+
+### `/pm:prd-new`
+- **Purpose**: Launch brainstorming for new product requirement document
+- **Usage**: `/pm:prd-new <feature_name> [--from-idea <idea_file>]`
+- **Description**: Creates comprehensive PRD through guided brainstorming. Can start from validated idea file for enhanced context.
+- **Options**:
+  - `--from-idea <file>`: Start with existing idea file as foundation (works with both raw ideas and validated ideas)
+- **Output**: `.claude/prds/<feature_name>.md` with complete PRD structure
+- **Integration**: Works seamlessly with validated ideas from `/pm:validate-idea`
+- **Best Practice**: Use after `/pm:new-project` for separation of concerns
 
 ## Context Commands
 
@@ -141,6 +172,7 @@ To add new commands:
 
 Commands often use agents for heavy lifting:
 
+- **idea-validator**: Fully automated idea validation with web research
 - **test-runner**: Executes tests, analyzes results
 - **file-analyzer**: Summarizes verbose files
 - **code-analyzer**: Hunts bugs across codebase

@@ -94,10 +94,30 @@ if [ -n "$IDEA_FILE" ]; then
     fi
 fi
 
-# Validate project name
+# Validate and normalize project name
+ORIGINAL_PROJECT_NAME="$PROJECT_NAME"
+PROJECT_NAME=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]')
+
+if [[ "$ORIGINAL_PROJECT_NAME" != "$PROJECT_NAME" ]]; then
+    echo "📝 Project name converted to lowercase: $PROJECT_NAME"
+fi
+
 if [[ ! "$PROJECT_NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
     echo "❌ Project name must be alphanumeric with dashes/underscores only"
     exit 1
+fi
+
+# Validate idea file (if provided)
+if [ -n "$IDEA_FILE" ]; then
+    if [ ! -f "$IDEA_FILE" ]; then
+        echo "❌ Idea file not found: $IDEA_FILE"
+        exit 1
+    fi
+    if [ ! -r "$IDEA_FILE" ]; then
+        echo "❌ Cannot read idea file: $IDEA_FILE"
+        exit 1
+    fi
+    echo "✅ Idea file validated: $IDEA_FILE"
 fi
 
 # Validate email format
@@ -137,14 +157,49 @@ fi
 git remote add origin "https://github.com/$GITHUB_USERNAME/$PROJECT_NAME.git"
 echo "  ✅ Remote set to: https://github.com/$GITHUB_USERNAME/$PROJECT_NAME.git"
 
-# 3. Update README placeholders
+# 3. Create Clean Project Files
 echo ""
-echo "📝 Updating project files..."
-if [ -f "README.md" ]; then
-    sed -i "s/TUO-USERNAME/$GITHUB_USERNAME/g" README.md
-    sed -i "s/my-new-project/$PROJECT_NAME/g" README.md
-    echo "  ✅ README.md updated with your details"
-fi
+echo "📝 Creating project files..."
+
+# Remove CCPM-specific files that shouldn't be in new projects
+rm -f screenshot.webp LICENSE
+
+# Create project-specific README
+cat > README.md << EOF
+# $PROJECT_NAME
+
+Project created with enhanced CCPM system.
+
+## Getting Started
+
+This project uses Claude Code PM for project management and development workflow.
+
+### Quick Start
+
+1. Set up project context: \`/context:create\`
+2. Create your first PRD: \`/pm:prd-new project-foundation\`
+3. View available commands: \`/pm:help\`
+
+### CCPM Documentation
+
+- **Commands Reference**: \`.claude/docs/COMMANDS.md\`
+- **Agents Guide**: \`.claude/docs/AGENTS.md\`
+- **Project Management**: Run \`/pm:help\` for PM commands
+
+## Development
+
+[Add your project-specific development instructions here]
+
+## Contributing
+
+[Add your contributing guidelines here]
+
+---
+
+Built with [Claude Code PM](https://github.com/automazeio/ccpm) - Enhanced fork by [Bias93](https://github.com/Bias93/ccpm)
+EOF
+
+echo "  ✅ Created clean project README.md"
 
 # 4. Initialize CCPM System  
 echo ""
@@ -182,89 +237,50 @@ fi
 # 5. Process Idea File (if provided)
 if [ -n "$IDEA_FILE" ]; then
     echo ""
-    echo "🧠 Processing idea file..."
+    echo "🧠 Idea file detected..."
+    echo "  📄 Idea file: $IDEA_FILE"
+    echo "  💡 Your idea will be used as starting point for guided PRD creation"
+    echo "  ✅ Ready for enhanced brainstorming with /pm:prd-new"
     
-    # Create PRD directory if it doesn't exist
+    # Ensure PRD directory exists
     mkdir -p .claude/prds
     
-    # Read idea file content
-    IDEA_CONTENT=$(cat "$IDEA_FILE")
-    
-    # Create project-foundation PRD based on template and idea
-    cat > .claude/prds/project-foundation.md << EOF
----
-name: $PROJECT_NAME Foundation
-type: project-foundation
-status: draft
-priority: high
-author: $USER_NAME
-created: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-updated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
----
-
-# $PROJECT_NAME - Project Foundation
-
-## Original Idea
-
-$IDEA_CONTENT
-
-## Project Vision
-
-**What is this project?**
-[Based on the idea above, define what this project will become]
-
-**Why does this project exist?**
-[Problem being solved or opportunity being addressed based on the idea]
-
-**What success looks like?**
-[Clear success metrics and outcomes]
-
-## Core Features
-
-**MVP Feature Set:**
-[Extract key features from the original idea]
-1. [Essential feature 1]
-2. [Essential feature 2] 
-3. [Essential feature 3]
-
-**Future Features (Post-MVP):**
-[Additional ideas for later development]
-- [Feature for later]
-- [Feature for later]
-
-## Technical Foundation
-
-**Architecture Decisions:**
-[To be determined based on requirements]
-- Frontend: [React/Vue/Angular/Vanilla]
-- Backend: [Node.js/Python/Go/etc]
-- Database: [PostgreSQL/MongoDB/SQLite]
-- Deployment: [Vercel/AWS/Docker]
-
-## Success Criteria
-
-**Technical Metrics:**
-- [ ] Project builds successfully
-- [ ] All tests pass
-- [ ] Core user journey works end-to-end
-
-**Functional Metrics:**
-[Based on the original idea]
-- [ ] [Key functionality from idea works]
-- [ ] [User can achieve main goal]
-
-## Next Steps
-
-1. Refine this PRD based on the original idea
-2. Add specific technical requirements
-3. Define detailed user stories
-4. Create implementation plan with /pm:prd-parse project-foundation
-EOF
-    
-    echo "  ✅ Created project-foundation PRD from idea file"
+    IDEA_PREVIEW=$(head -n 3 "$IDEA_FILE" | tr '\n' ' ' | cut -c1-100)
+    echo "  📝 Idea preview: \"$IDEA_PREVIEW...\""
 fi
 
-# 6. Create Initial Commit
+# 6. GitHub Repository Creation
+echo ""
+echo "🐙 GitHub Repository Setup"
+echo "=========================="
+read -p "Do you want to create a GitHub repository now? (y/n): " create_repo
+if [[ "$create_repo" =~ ^[Yy]$ ]]; then
+    read -p "Should the repository be public or private? (public/private): " repo_visibility
+    if [[ "$repo_visibility" == "private" ]]; then
+        echo "  📝 Creating private repository..."
+        if gh repo create "$PROJECT_NAME" --private --description "Project created with CCPM Enhanced"; then
+            echo "  ✅ Private repository created successfully"
+            REPO_CREATED=true
+        else
+            echo "  ❌ Failed to create repository"
+            REPO_CREATED=false
+        fi
+    else
+        echo "  📝 Creating public repository..."
+        if gh repo create "$PROJECT_NAME" --public --description "Project created with CCPM Enhanced"; then
+            echo "  ✅ Public repository created successfully"
+            REPO_CREATED=true
+        else
+            echo "  ❌ Failed to create repository"
+            REPO_CREATED=false
+        fi
+    fi
+else
+    echo "  ⏭️ Skipping GitHub repository creation"
+    REPO_CREATED=false
+fi
+
+# 7. Create Initial Commit
 echo ""
 echo "📦 Creating initial commit..."
 git add .
@@ -279,7 +295,7 @@ commit_msg="Initial project setup with enhanced CCPM
 # Add idea processing info if applicable
 if [ -n "$IDEA_FILE" ]; then
     commit_msg="$commit_msg
-- Project foundation PRD created from $IDEA_FILE"
+- Idea file processed: $IDEA_FILE (ready for PRD creation)"
 fi
 
 commit_msg="$commit_msg
@@ -289,6 +305,17 @@ commit_msg="$commit_msg
 
 if git commit -m "$commit_msg"; then
     echo "  ✅ Initial commit created"
+    
+    # Push to GitHub if repository was created
+    if [ "$REPO_CREATED" = true ]; then
+        echo ""
+        echo "📤 Pushing to GitHub..."
+        if git push -u origin main; then
+            echo "  ✅ Code pushed to GitHub successfully"
+        else
+            echo "  ❌ Failed to push to GitHub"
+        fi
+    fi
 else
     echo "  ❌ Failed to create initial commit"
     exit 1
@@ -304,9 +331,15 @@ echo "🔗 Remote: https://github.com/$GITHUB_USERNAME/$PROJECT_NAME.git"
 echo "👤 Git User: $USER_NAME <$USER_EMAIL>"
 echo ""
 echo "🎯 Next Steps:"
-echo "1. Create GitHub repository: https://github.com/new"
-echo "   Repository name: $PROJECT_NAME"
-echo "2. Push initial commit: git push -u origin main"
+if [ "$REPO_CREATED" = true ]; then
+    echo "1. ✅ GitHub repository created and code pushed"
+    echo "2. Create project CLAUDE.md:"
+else
+    echo "1. Create GitHub repository manually: https://github.com/new"
+    echo "   Repository name: $PROJECT_NAME"
+    echo "2. Push initial commit: git push -u origin main"
+    echo "3. Create project CLAUDE.md:"
+fi
 echo ""
 echo "📋 If CCPM setup had issues, complete manually:"
 echo "   • Install GitHub CLI: https://cli.github.com/"
@@ -317,23 +350,27 @@ echo ""
 echo "3. Create project CLAUDE.md:"
 echo "   /init include rules from .claude/CLAUDE.md"
 echo ""
-echo "4. Create project context:"
-echo "   /context:create"
-echo ""
 
 if [ -n "$IDEA_FILE" ]; then
-    echo "5. Continue with implementation plan:"
-    echo "   /pm:prd-parse project-foundation"
-    echo "   /pm:epic-oneshot project-foundation"
-    echo "   /pm:issue-start 1234  # First setup task"
+    echo "4. Create PRD from your idea with guided brainstorming:"
+    echo "   /pm:prd-new project-foundation --from-idea $IDEA_FILE"
 else
-    echo "5. Start with foundation PRD:"
+    echo "4. Create foundation PRD with guided brainstorming:"
     echo "   /pm:prd-new project-foundation"
-    echo "   # Then continue with technical plan:"
-    echo "   /pm:prd-parse project-foundation"
-    echo "   /pm:epic-oneshot project-foundation"
-    echo "   /pm:issue-start 1234  # First setup task"
 fi
+
+echo ""
+echo "5. Create technical implementation plan:"
+echo "   /pm:prd-parse project-foundation"
+echo "   /pm:epic-oneshot project-foundation"
+echo ""
+echo "6. Start implementing basic project structure:"
+echo "   /pm:issue-start 1234  # First setup task"
+echo "   # Implement 2-3 initial tasks (package.json, structure, etc.)"
+echo ""
+echo "7. Create project context (after some implementation):"
+echo "   /context:create"
+echo "   # Note: More effective after implementing basic structure"
 
 echo ""
 echo "📚 Documentation: README.md"
