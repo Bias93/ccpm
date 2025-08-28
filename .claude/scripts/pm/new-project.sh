@@ -201,7 +201,15 @@ EOF
 
 echo "  ✅ Created clean project README.md"
 
-# 4. Initialize CCPM System  
+# 4. Clean Up Project Structure
+echo ""
+echo "🧹 Cleaning up CCPM-specific files..."
+rm -f LICENSE  # Remove CCPM license
+rm -f screenshot.webp  # Remove CCPM screenshot
+echo "  ✅ Removed CCPM license and assets"
+echo "  📝 Note: Add your own LICENSE file if needed"
+
+# 5. Initialize CCPM System  
 echo ""
 echo "🛠️ Initializing CCPM system..."
 if bash .claude/scripts/pm/init.sh; then

@@ -1,0 +1,22 @@
+# Exclude CCPM system files from GitHub language detection
+.claude/** linguist-vendored=true
+*.md linguist-documentation=true
+screenshot.webp linguist-vendored=true
+
+# Ensure common languages are detected properly  
+*.js linguist-detectable=true
+*.ts linguist-detectable=true
+*.jsx linguist-detectable=true
+*.tsx linguist-detectable=true
+*.py linguist-detectable=true
+*.go linguist-detectable=true
+*.rs linguist-detectable=true
+*.java linguist-detectable=true
+*.kt linguist-detectable=true
+*.swift linguist-detectable=true
+*.dart linguist-detectable=true
+*.php linguist-detectable=true
+*.rb linguist-detectable=true
+*.cs linguist-detectable=true
+*.cpp linguist-detectable=true
+*.c linguist-detectable=true

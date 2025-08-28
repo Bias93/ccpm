@@ -82,12 +82,21 @@ git remote add origin https://github.com/{github-username}/{project-name}.git
 echo "✅ Git remote configured for your project"
 ```
 
-### 4. Update Project Files
+### 4. Clean Up Project Structure
+```bash
+# Remove CCPM-specific files that shouldn't be in user projects
+rm -f LICENSE  # Remove CCMP license
+rm -f screenshot.webp  # Remove CCPM screenshot
+
+echo "✅ Cleaned up CCPM-specific files"
+```
+
+### 5. Update Project Files
 Update README.md to replace placeholders:
 - Replace `TUO-USERNAME` with actual github-username
 - Replace `my-new-project` with actual project-name
 
-### 5. Initialize CCPM
+### 6. Initialize CCPM
 ```bash
 # Run standard CCPM initialization
 bash .claude/scripts/pm/init.sh
@@ -95,7 +104,7 @@ bash .claude/scripts/pm/init.sh
 echo "✅ CCPM system initialized"
 ```
 
-### 6. Process Idea File (if provided)
+### 7. Process Idea File (if provided)
 If --from-idea flag is used:
 ```bash
 # Read and process idea file into project-foundation PRD
@@ -108,7 +117,7 @@ echo "🧠 Processing idea file: {idea-file}"
 echo "✅ Created project-foundation PRD from idea"
 ```
 
-### 7. Create Initial Commit
+### 8. Create Initial Commit
 ```bash
 # Commit the configured setup
 git add .
