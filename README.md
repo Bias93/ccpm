@@ -71,9 +71,15 @@ graph LR
 
 # 4. Transform PRD into technical implementation plan (4 min)
 /pm:prd-parse project-foundation
+
+# 5. Generate project-specific AI agents (2 min) ✨ NEW
+/pm:agent-generate project-foundation
+# → Creates 5-7 specialized agents that know your exact stack
+
+# 6. Decompose and sync to GitHub (3 min)
 /pm:epic-oneshot project-foundation
 
-# 5. Start parallel development
+# 7. Start parallel development
 /pm:issue-start 1234
 ```
 
@@ -84,6 +90,7 @@ graph LR
 | **Manual idea validation** | **✨ Automated validation** with 15+ web searches & lean startup framework |
 | Context lost between sessions | **Persistent context** across all work |
 | Serial task execution | **Parallel agents** on independent tasks |
+| Generic AI assistants | **🎯 Project-specific agents** that know your exact stack |
 | "Vibe coding" from memory | **Spec-driven** with full traceability |
 | Progress hidden in branches | **Transparent audit trail** in GitHub |
 | Manual task coordination | **Intelligent prioritization** with `/pm:next` |
@@ -119,6 +126,56 @@ By using GitHub Issues as our database, we unlock something powerful:
 - Labels provide organization
 
 This isn't just a project management system – it's a **collaboration protocol** that lets humans and AI agents work together at scale, using infrastructure your team already trusts.
+
+## Project-Specific AI Agents 🎯 NEW
+
+Unlike generic AI assistants that guess at your technology stack, CCPM generates **custom AI agents for YOUR specific project**:
+
+### How It Works
+
+```bash
+/pm:agent-generate my-project
+```
+
+This command:
+1. **Analyzes your PRD** to understand requirements
+2. **Decides optimal tech stack** based on project type
+3. **Generates 5-7 specialized agents** that know:
+   - Your exact technology choices (Next.js 15, PostgreSQL, etc.)
+   - Your architectural patterns
+   - Your specific requirements
+   - Your coding conventions
+
+### Stack Decision Matrix
+
+CCPM automatically selects the best stack for your project:
+
+| Project Type | Stack Selected | Why |
+|--------------|----------------|-----|
+| **Web App** | Next.js 15 + Prisma + PostgreSQL | Full-stack, type-safe, Vercel deploy |
+| **API Service** | Fastify + SQLite | Lightweight, fast, zero config |
+| **Mobile App** | React Native + Expo | Cross-platform, single codebase |
+| **Desktop App** | Electron + React | Familiar, extensible |
+| **CLI Tool** | Node.js + Commander | Simple, npm distribution |
+
+### Generated Agents
+
+Each project gets custom specialists:
+- `{project}-setup-specialist` - Boilerplate, config, dependencies
+- `{project}-backend-specialist` - API, database, business logic
+- `{project}-frontend-specialist` - UI, components, state
+- `{project}-data-specialist` - Schema, migrations, models
+- `{project}-testing-specialist` - Test strategy and implementation
+- `{project}-deployment-specialist` - CI/CD, hosting, monitoring
+
+### Intelligent Model Selection
+
+Agents use the right Claude model for each task:
+- **Haiku** - Simple tasks (setup, config)
+- **Sonnet** - Development tasks (backend, frontend)
+- **Opus** - Complex tasks (architecture, testing strategy)
+
+This means **faster responses** and **lower costs** without sacrificing quality.
 
 ## Core Principle: No Vibe Coding
 
@@ -225,6 +282,13 @@ Specialized agents implement tasks while maintaining progress updates and an aud
 - `/pm:prd-list` - List all PRDs
 - `/pm:prd-edit` - Edit existing PRD
 - `/pm:prd-status` - Show PRD implementation status
+
+### Agent Generation Commands ✨ NEW
+- `/pm:agent-generate <project>` - **Generate 5-7 project-specific AI agents with optimal stack selection**
+  - 🤖 **Custom specialists** - Each agent knows your exact tech stack
+  - 🎯 **Zero assumptions** - Agents understand your specific requirements
+  - ⚡ **Model optimization** - Right Claude model for each task type
+  - 💰 **Cost effective** - Haiku for simple, Sonnet for dev, Opus for complex
 
 ### Epic Commands
 - `/pm:epic-decompose` - Break epic into task files
@@ -388,13 +452,17 @@ echo "AI coding assistant for mobile apps" > IDEA.md
 /pm:prd-parse project-foundation
 # → Technical architecture and approach
 
+# Generate project-specific AI agents ✨ NEW
+/pm:agent-generate project-foundation
+# → Creates custom agents that know your exact stack
+
 # Push to GitHub and start parallel development
 /pm:epic-oneshot project-foundation
 # Creates issues: #1234 (epic), #1235, #1236 (tasks)
 
-# Begin implementation
+# Begin implementation with project-specific agent
 /pm:issue-start 1235
-# Specialized agent begins work
+# Project-specific agent begins work with full context
 
 # Monitor progress
 /pm:epic-show project-foundation
@@ -435,9 +503,14 @@ echo "My app idea: A platform that..." > IDEA.md
 
 # 6. Generate technical plan (4 min)
 /pm:prd-parse project-foundation
+
+# 7. Generate project-specific agents (2 min)
+/pm:agent-generate project-foundation
+
+# 8. Decompose and sync to GitHub (3 min)
 /pm:epic-oneshot project-foundation
 
-# 7. Start development
+# 9. Start development
 /pm:issue-start 1234
 ```
 

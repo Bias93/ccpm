@@ -2,14 +2,22 @@
 allowed-tools: Bash, Read, Write, LS, Task
 ---
 
-# Epic Sync
+# Epic Sync Enhanced 2025
 
-Push epic and tasks to GitHub as issues.
+Push epic and tasks to GitHub as issues with improved reliability and solo-dev optimizations.
 
 ## Usage
 ```
 /pm:epic-sync <feature_name>
 ```
+
+## Solo-Dev Enhancements
+
+This enhanced version provides:
+- **Robust error handling** with fail-fast approach
+- **Smart labeling** for GitHub project management  
+- **Sequential processing** for reliability over speed
+- **Professional workflow** optimized for solo developers
 
 ## Quick Check
 
@@ -25,7 +33,35 @@ If no tasks found: "❌ No tasks to sync. Run: /pm:epic-decompose $ARGUMENTS"
 
 ## Instructions
 
-### 1. Create Epic Issue
+### 1. Enhanced GitHub Authentication Check
+
+```bash
+# Robust authentication validation with clear error messages
+echo "🔄 Starting GitHub sync for epic: $ARGUMENTS"
+
+# Validate GitHub CLI authentication
+if ! gh auth status >/dev/null 2>&1; then
+  echo "❌ GitHub CLI not authenticated"
+  echo "   Please run: gh auth login"
+  echo "   Then retry: /pm:epic-sync $ARGUMENTS"
+  exit 1
+fi
+
+# Get current repository info for validation
+REPO_INFO=$(gh repo view --json nameWithOwner,name,owner -q '{nameWithOwner: .nameWithOwner, name: .name, owner: .owner.login}' 2>/dev/null) || {
+  echo "❌ Not in a valid GitHub repository"
+  echo "   Ensure you're in a repository with remote origin"
+  exit 1
+}
+
+REPO_NAME=$(echo "$REPO_INFO" | jq -r '.nameWithOwner')
+echo "✅ Authenticated for repository: $REPO_NAME"
+
+# Get real current datetime for timestamps
+CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+```
+
+### 2. Create Epic Issue with Professional Standards
 
 Strip frontmatter and prepare GitHub issue body:
 ```bash
@@ -78,221 +114,209 @@ else
   epic_type="feature"
 fi
 
-# Create epic issue with labels
+# Create epic issue with enhanced labels for solo-dev workflow
 epic_number=$(gh issue create \
-  --title "Epic: $ARGUMENTS" \
+  --title "🚀 Epic: $ARGUMENTS" \
   --body-file /tmp/epic-body.md \
-  --label "epic,epic:$ARGUMENTS,$epic_type" \
-  --json number -q .number)
+  --label "epic,solo-dev,enhancement,epic:$ARGUMENTS" \
+  --json number -q .number) || {
+  echo "❌ Failed to create epic issue"
+  echo "   Check repository permissions and try again"
+  exit 1
+}
 ```
 
 Store the returned issue number for epic frontmatter update.
 
-### 2. Create Task Sub-Issues
+### 3. Create Task Sub-Issues (Simplified & Reliable)
 
-Check if gh-sub-issue is available:
+**Enhanced approach**: Sequential creation for maximum reliability:
+
 ```bash
-if gh extension list | grep -q "yahsan2/gh-sub-issue"; then
-  use_subissues=true
+echo "✅ Created epic issue: #$epic_number"
+echo "🔄 Creating task sub-issues..."
+
+# Count tasks for progress tracking
+task_files=($(ls .claude/epics/$ARGUMENTS/[0-9][0-9][0-9].md 2>/dev/null))
+task_count=${#task_files[@]}
+
+if [ $task_count -eq 0 ]; then
+  echo "⚠️ No tasks found to sync"
+  echo "   Run: /pm:epic-decompose $ARGUMENTS"
+  exit 1
+fi
+
+echo "   Processing $task_count tasks..."
+
+# Sequential task creation with smart labeling and error handling
+created_count=0
+failed_count=0
+
+> /tmp/task-mapping.txt  # Clear mapping file
+
+for task_file in "${task_files[@]}"; do
+  [ -f "$task_file" ] || continue
+  
+  # Extract task information from frontmatter
+  task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
+  task_body=$(sed '1,/^---$/d; 1,/^---$/d' "$task_file")
+  
+  # Determine task type for smart labeling (solo-dev optimization)
+  case "$task_name" in
+    *"backend"*|*"api"*|*"server"*|*"database"*) task_type="backend" ;;
+    *"frontend"*|*"ui"*|*"component"*|*"page"*) task_type="frontend" ;;
+    *"test"*|*"spec"*|*"testing"*) task_type="testing" ;;
+    *"deploy"*|*"ci"*|*"cd"*|*"infra"*) task_type="deployment" ;;
+    *"docs"*|*"documentation"*) task_type="documentation" ;;
+    *) task_type="general" ;;
+  esac
+  
+  # Create task issue with enhanced labeling
+  task_number=$(gh issue create \
+    --title "$task_name" \
+    --body "$task_body" \
+    --label "task,solo-dev,$task_type,epic:$ARGUMENTS" \
+    --json number -q .number 2>/dev/null) || {
+    echo "   ❌ Failed to create: $task_name"
+    failed_count=$((failed_count + 1))
+    continue
+  }
+  
+  # Success - record mapping and update file immediately
+  echo "$task_file:$task_number" >> /tmp/task-mapping.txt
+  
+  # Update task file with GitHub URL and current timestamp  
+  github_url="https://github.com/$REPO_NAME/issues/$task_number"
+  
+  # Create new file with issue number as filename
+  new_file=".claude/epics/$ARGUMENTS/${task_number}.md"
+  
+  # Update frontmatter in new file
+  sed "/^github:/c\github: $github_url" "$task_file" | \
+  sed "/^updated:/c\updated: $CURRENT_DATE" > "$new_file"
+  
+  # Remove old file if different name
+  [ "$task_file" != "$new_file" ] && rm "$task_file"
+  
+  created_count=$((created_count + 1))
+  echo "   ✅ #$task_number: $task_name"
+done
+
+# Summary of task creation
+if [ $created_count -eq $task_count ]; then
+  echo "✅ All $created_count tasks created successfully"
+elif [ $created_count -gt 0 ]; then
+  echo "⚠️ Created $created_count/$task_count tasks ($failed_count failed)"
+  echo "   You can manually retry failed tasks or continue"
 else
-  use_subissues=false
-  echo "⚠️ gh-sub-issue not installed. Using fallback mode."
+  echo "❌ Failed to create any tasks"
+  echo "   Check repository permissions and GitHub CLI authentication"
+  exit 1
 fi
-```
 
-Count task files to determine strategy:
-```bash
-task_count=$(ls .claude/epics/$ARGUMENTS/[0-9][0-9][0-9].md 2>/dev/null | wc -l)
-```
-
-### For Small Batches (< 5 tasks): Sequential Creation
+### 4. Update Epic Frontmatter and Create Worktree
 
 ```bash
-if [ "$task_count" -lt 5 ]; then
-  # Create sequentially for small batches
-  for task_file in .claude/epics/$ARGUMENTS/[0-9][0-9][0-9].md; do
-    [ -f "$task_file" ] || continue
-    
-    # Extract task name from frontmatter
-    task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
-    
-    # Strip frontmatter from task content
-    sed '1,/^---$/d; 1,/^---$/d' "$task_file" > /tmp/task-body.md
-    
-    # Create sub-issue with labels
-    if [ "$use_subissues" = true ]; then
-      task_number=$(gh sub-issue create \
-        --parent "$epic_number" \
-        --title "$task_name" \
-        --body-file /tmp/task-body.md \
-        --label "task,epic:$ARGUMENTS" \
-        --json number -q .number)
-    else
-      task_number=$(gh issue create \
-        --title "$task_name" \
-        --body-file /tmp/task-body.md \
-        --label "task,epic:$ARGUMENTS" \
-        --json number -q .number)
-    fi
-    
-    # Record mapping for renaming
-    echo "$task_file:$task_number" >> /tmp/task-mapping.txt
-  done
-  
-  # After creating all issues, update references and rename files
-  # This follows the same process as step 3 below
-fi
-```
+# Update epic frontmatter with GitHub URL and timestamp
+echo "🔄 Updating epic frontmatter..."
 
-### For Larger Batches: Parallel Creation
+epic_url="https://github.com/$REPO_NAME/issues/$epic_number"
 
-```bash
-if [ "$task_count" -ge 5 ]; then
-  echo "Creating $task_count sub-issues in parallel..."
-  
-  # Check if gh-sub-issue is available for parallel agents
-  if gh extension list | grep -q "yahsan2/gh-sub-issue"; then
-    subissue_cmd="gh sub-issue create --parent $epic_number"
-  else
-    subissue_cmd="gh issue create"
-  fi
-  
-  # Batch tasks for parallel processing
-  # Spawn agents to create sub-issues in parallel with proper labels
-  # Each agent must use: --label "task,epic:$ARGUMENTS"
-fi
-```
-
-Use Task tool for parallel creation:
-```yaml
-Task:
-  description: "Create GitHub sub-issues batch {X}"
-  subagent_type: "general-purpose"
-  prompt: |
-    Create GitHub sub-issues for tasks in epic $ARGUMENTS
-    Parent epic issue: #$epic_number
-    
-    Tasks to process:
-    - {list of 3-4 task files}
-    
-    For each task file:
-    1. Extract task name from frontmatter
-    2. Strip frontmatter using: sed '1,/^---$/d; 1,/^---$/d'
-    3. Create sub-issue using:
-       - If gh-sub-issue available: 
-         gh sub-issue create --parent $epic_number --title "$task_name" \
-           --body-file /tmp/task-body.md --label "task,epic:$ARGUMENTS"
-       - Otherwise: 
-         gh issue create --title "$task_name" --body-file /tmp/task-body.md \
-           --label "task,epic:$ARGUMENTS"
-    4. Record: task_file:issue_number
-    
-    IMPORTANT: Always include --label parameter with "task,epic:$ARGUMENTS"
-    
-    Return mapping of files to issue numbers.
-```
-
-Consolidate results from parallel agents:
-```bash
-# Collect all mappings from agents
-cat /tmp/batch-*/mapping.txt >> /tmp/task-mapping.txt
-
-# IMPORTANT: After consolidation, follow step 3 to:
-# 1. Build old->new ID mapping
-# 2. Update all task references (depends_on, conflicts_with)
-# 3. Rename files with proper frontmatter updates
-```
-
-### 3. Rename Task Files and Update References
-
-First, build a mapping of old numbers to new issue IDs:
-```bash
-# Create mapping from old task numbers (001, 002, etc.) to new issue IDs
-> /tmp/id-mapping.txt
-while IFS=: read -r task_file task_number; do
-  # Extract old number from filename (e.g., 001 from 001.md)
-  old_num=$(basename "$task_file" .md)
-  echo "$old_num:$task_number" >> /tmp/id-mapping.txt
-done < /tmp/task-mapping.txt
-```
-
-Then rename files and update all references:
-```bash
-# Process each task file
-while IFS=: read -r task_file task_number; do
-  new_name="$(dirname "$task_file")/${task_number}.md"
-  
-  # Read the file content
-  content=$(cat "$task_file")
-  
-  # Update depends_on and conflicts_with references
-  while IFS=: read -r old_num new_num; do
-    # Update arrays like [001, 002] to use new issue numbers
-    content=$(echo "$content" | sed "s/\b$old_num\b/$new_num/g")
-  done < /tmp/id-mapping.txt
-  
-  # Write updated content to new file
-  echo "$content" > "$new_name"
-  
-  # Remove old file if different from new
-  [ "$task_file" != "$new_name" ] && rm "$task_file"
-  
-  # Update github field in frontmatter
-  # Add the GitHub URL to the frontmatter
-  repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-  github_url="https://github.com/$repo/issues/$task_number"
-  
-  # Update frontmatter with GitHub URL and current timestamp
-  current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  
-  # Use sed to update the github and updated fields
-  sed -i.bak "/^github:/c\github: $github_url" "$new_name"
-  sed -i.bak "/^updated:/c\updated: $current_date" "$new_name"
-  rm "${new_name}.bak"
-done < /tmp/task-mapping.txt
-```
-
-### 4. Update Epic with Task List (Fallback Only)
-
-If NOT using gh-sub-issue, add task list to epic:
-
-```bash
-if [ "$use_subissues" = false ]; then
-  # Get current epic body
-  gh issue view {epic_number} --json body -q .body > /tmp/epic-body.md
-  
-  # Append task list
-  cat >> /tmp/epic-body.md << 'EOF'
-  
-  ## Tasks
-  - [ ] #{task1_number} {task1_name}
-  - [ ] #{task2_number} {task2_name}
-  - [ ] #{task3_number} {task3_name}
-  EOF
-  
-  # Update epic issue
-  gh issue edit {epic_number} --body-file /tmp/epic-body.md
-fi
-```
-
-With gh-sub-issue, this is automatic!
-
-### 5. Update Epic File
-
-Update the epic file with GitHub URL, timestamp, and real task IDs:
-
-#### 5a. Update Frontmatter
-```bash
-# Get repo info
-repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-epic_url="https://github.com/$repo/issues/$epic_number"
-current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-# Update epic frontmatter
+# Update epic file frontmatter
 sed -i.bak "/^github:/c\github: $epic_url" .claude/epics/$ARGUMENTS/epic.md
-sed -i.bak "/^updated:/c\updated: $current_date" .claude/epics/$ARGUMENTS/epic.md
-rm .claude/epics/$ARGUMENTS/epic.md.bak
+sed -i.bak "/^updated:/c\updated: $CURRENT_DATE" .claude/epics/$ARGUMENTS/epic.md
+rm .claude/epics/$ARGUMENTS/epic.md.bak 2>/dev/null || true
+
+echo "✅ Epic frontmatter updated"
+
+# Create development worktree for solo-dev workflow
+echo "🔄 Creating development worktree..."
+
+# Ensure we're on main and up to date
+git checkout main >/dev/null 2>&1 || {
+  echo "⚠️ Could not switch to main branch"
+  echo "   Current branch will be used as base"
+}
+
+git pull origin main >/dev/null 2>&1 || {
+  echo "⚠️ Could not pull latest main"
+  echo "   Using current branch state"
+}
+
+# Create worktree for epic development
+if git worktree add "../epic-$ARGUMENTS" -b "epic/$ARGUMENTS" >/dev/null 2>&1; then
+  echo "✅ Created worktree: ../epic-$ARGUMENTS"
+  echo "   Branch: epic/$ARGUMENTS"
+else
+  echo "⚠️ Worktree may already exist or there was an issue"
+  echo "   You can manually create it or use existing: ../epic-$ARGUMENTS"
+fi
+
+### 5. Solo-Dev Success Output
+
+```bash
+echo ""
+echo "🚀 Epic Sync Complete (Enhanced 2025)!"
+echo ""
+echo "✅ GitHub Integration:"
+echo "   Epic: #$epic_number - https://github.com/$REPO_NAME/issues/$epic_number"
+echo "   Tasks: $created_count issues created with smart labels"
+echo ""
+echo "🏷️  Smart Labeling Applied:"
+echo "   - epic, solo-dev, enhancement (epic level)"
+echo "   - task, solo-dev, [type] (task level: backend/frontend/testing/deployment)"
+echo ""
+echo "📁 Development Environment:"
+echo "   Worktree: ../epic-$ARGUMENTS"
+echo "   Branch: epic/$ARGUMENTS"
+echo ""
+echo "💰 Cost-Effective Workflow Ready:"
+echo "   - All issues properly labeled for GitHub Projects"
+echo "   - Sequential processing for reliability"
+echo "   - Professional standards maintained"
+echo ""
+echo "🚀 Next Steps:"
+echo "   Start development: /pm:epic-start $ARGUMENTS"
+echo "   Work on single task: /pm:issue-start [task_number]"
+echo "   View epic: https://github.com/$REPO_NAME/issues/$epic_number"
 ```
+
+## Enhanced Reliability Features
+
+This improved sync process provides:
+
+### Error Handling
+- **Fail-fast authentication** checks before any operations
+- **Individual task error handling** (continues on failures)
+- **Clear error messages** with actionable guidance
+- **Partial success handling** (reports what succeeded)
+
+### Solo-Dev Optimizations
+- **Smart labeling** for GitHub project management
+- **Sequential processing** for maximum reliability  
+- **Professional workflow** without complexity overhead
+- **Cost-effective** approach (no premium tools required)
+
+### Robustness Improvements
+- **Real-time GitHub URL updates** in frontmatter
+- **Immediate file renaming** after successful issue creation
+- **Timestamp consistency** across all operations
+- **Worktree integration** for development workflow
+
+## Migration from Old epic-sync
+
+The old approach had these issues:
+- ❌ Complex parallel agents prone to failures
+- ❌ Weak error handling leaving partial state
+- ❌ gh-sub-issue dependency
+- ❌ Complex file renaming process
+
+This enhanced version:
+- ✅ Sequential processing for reliability
+- ✅ Robust error handling with clear messages
+- ✅ No external dependencies beyond GitHub CLI
+- ✅ Immediate updates prevent inconsistent state
+- ✅ Smart labeling for solo-dev project management
 
 #### 5b. Update Tasks Created Section
 ```bash

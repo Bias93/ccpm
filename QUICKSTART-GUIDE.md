@@ -106,21 +106,27 @@ Chi lo usa: knowledge workers, studenti, ricercatori.
 
 ---
 
-## 🏗️ Step 5: Epic e Task Planning (2 minuti)
+## 🏗️ Step 5: Epic Planning e Agent Generation (4 minuti)
 
 ```bash
-# Trasforma PRD in epic e GitHub Issues
+# Trasforma PRD in epic 
 /pm:prd-parse project-foundation
+
+# Genera AI agents specifici per il TUO progetto ✨ NEW
+/pm:agent-generate project-foundation
+
+# Crea task e sincronizza con GitHub
 /pm:epic-oneshot project-foundation
 ```
 
 **Cosa succede:**
 - 📋 Epic breakdown in task da 1-3 giorni
+- 🤖 **5-7 AI agents custom** che conoscono il tuo stack esatto
 - 🏷️ GitHub Issues creati automaticamente
 - 🔗 Link tra PRD → Epic → Issues → Code
 - 📈 Progress tracking setup
 
-**Risultato:** GitHub Issues pronti per development.
+**Risultato:** GitHub Issues pronti + agents project-specific generati.
 
 ---
 
@@ -170,14 +176,46 @@ Knowledge base ricercabile." > IDEA.md
 /pm:prd-new project-foundation --from-idea VALIDATED-IDEA.md
 # → Brainstorming guidato + PRD dettagliato
 
-# 5. Epic e GitHub Issues (2 min)
+# 5. Epic e Agent Generation (4 min)
 /pm:prd-parse project-foundation
+/pm:agent-generate project-foundation  # ✨ NEW: Custom AI agents
 /pm:epic-oneshot project-foundation
 
 # 6. Push e development
 git push -u origin main
 /context:prime && /pm:next && /pm:issue-start 1
 ```
+
+---
+
+## 🤖 Project-Specific AI Agents (NEW!)
+
+**Il sistema genera AI agents CUSTOM per il tuo progetto:**
+
+```bash
+/pm:agent-generate project-foundation
+```
+
+**Agents generati (5-7):**
+- `{project}-setup-specialist` - Boilerplate, config (Haiku model)
+- `{project}-backend-specialist` - API, database (Sonnet model)
+- `{project}-frontend-specialist` - UI, components (Sonnet model)
+- `{project}-data-specialist` - Schema, migrations (Sonnet model)
+- `{project}-testing-specialist` - Test strategy (Opus model)
+- `{project}-deployment-specialist` - CI/CD, hosting (Opus model)
+
+**Stack automaticamente selezionato:**
+- **Web App** → Next.js 15 + Prisma + PostgreSQL
+- **API Service** → Fastify + SQLite
+- **Mobile App** → React Native + Expo
+- **Desktop App** → Electron + React
+- **CLI Tool** → Node.js + Commander
+
+**Vantaggi:**
+- ✅ **Zero supposizioni** - Agents sanno esattamente il tuo stack
+- ✅ **Context perfetto** - Ogni agent conosce i requisiti PRD
+- ✅ **Cost optimization** - Modello giusto per ogni task
+- ✅ **Faster development** - Nessun prompt engineering
 
 ---
 
