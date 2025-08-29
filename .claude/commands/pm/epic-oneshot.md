@@ -29,13 +29,6 @@ test -f .claude/epics/$ARGUMENTS/epic.md || {
   exit 1
 }
 
-# Check for project-specific agents
-if ! ls .claude/agents/$ARGUMENTS-*-specialist.md 2>/dev/null | grep -q .; then
-  echo "❌ Project-specific agents not found."
-  echo "Generate them first: /pm:agent-generate $ARGUMENTS"
-  exit 1
-fi
-
 # Check for existing tasks
 if ls .claude/epics/$ARGUMENTS/[0-9]*.md 2>/dev/null | grep -q .; then
   echo "⚠️ Tasks already exist. This will overwrite them."
@@ -45,15 +38,22 @@ if ls .claude/epics/$ARGUMENTS/[0-9]*.md 2>/dev/null | grep -q .; then
 fi
 ```
 
-### 1. Simplified Flow with Project Agents
+### 1. Task Decomposition
 
-Now that project-specific agents exist, the flow is streamlined:
-
-**Use project-specific agents for enhanced context:**
+**Run epic-decompose to create tasks:**
 
 ```bash
-# Simply run epic-decompose with project agents
-echo "🔄 Using project-specific agents for task decomposition..."
+echo "🔄 Decomposing epic into tasks..."
+
+# Check if project-specific agents exist (optional, for better task assignment)
+if ls .claude/agents/$ARGUMENTS-*-specialist.md 2>/dev/null | grep -q .; then
+  echo "✅ Project-specific agents found - tasks will be assigned to them"
+else
+  echo "ℹ️ No project-specific agents - using generic assignments"
+  echo "   TIP: Run '/pm:agent-generate $ARGUMENTS' first for better results"
+fi
+
+# Decompose epic into tasks using task-planner agent
 /pm:epic-decompose $ARGUMENTS
 
 # Verify decomposition succeeded
@@ -62,14 +62,8 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "✅ Tasks created using project-specific agents"
+echo "✅ Tasks created successfully"
 ```
-
-This leverages the project-specific agents that:
-- Know the exact technology stack for this project
-- Understand the specific requirements from the PRD
-- Have been optimized for this project's scale and complexity
-- Follow the established patterns and conventions
 
 ### 3. Professional GitHub Sync (Simplified)
 

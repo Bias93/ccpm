@@ -56,162 +56,62 @@ CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 echo "Starting epic-decompose at: $CURRENT_DATE"
 ```
 
-### 3. Create Tasks Using Project-Specific Agents
+### 3. Create Tasks Using Task-Planner Agent
 
-**Use project-specific agents created by agent-generate:**
+**Use the generic task-planner agent to decompose the epic:**
 
-Before decomposing tasks, verify that project-specific agents exist:
-- Check for agents in `.claude/agents/{project-name}-*-specialist.md`
-- If not found, suggest running: `/pm:agent-generate $ARGUMENTS` first
-
-**Task Creation Strategy:**
-```yaml
-# Backend Tasks (using project-specific agent)
-Task:
-  description: "Design backend architecture tasks"
-  subagent_type: "{project-name}-backend-specialist"  # Project-specific agent
-  prompt: |
-    Create backend tasks for epic: $ARGUMENTS
-    
-    You have full context of this project's:
-    - Technology stack decisions
-    - Architecture patterns
-    - Requirements from PRD
-    
-    Solo-Dev Strategy:
-    - Use the established project stack
-    - Follow the project's architectural decisions
-    - Focus on rapid development with your known tools
-    - Leverage the cost-effective choices already made
-    
-    Return: Backend task specifications with:
-    - Task name and description
-    - Implementation approach using project stack
-    - Dependencies and order
-    - Estimated effort (XS/S/M/L/XL)
-    - Project-specific considerations
-
-# Frontend Tasks (using project-specific agent)  
-Task:
-  description: "Design frontend development tasks"
-  subagent_type: "{project-name}-frontend-specialist"  # Project-specific agent
-  prompt: |
-    Create frontend tasks for epic: $ARGUMENTS
-    
-    You understand this project's:
-    - UI framework and component choices
-    - Design system decisions
-    - User experience requirements
-    
-    Solo-Dev Frontend Strategy:
-    - Use the project's chosen UI framework
-    - Follow established component patterns
-    - Implement the specific UX requirements
-    - Optimize for the project's target users
-    
-    Return: Frontend task specifications with:
-    - Component/page/feature breakdown using project stack
-    - User experience based on project requirements
-    - Performance requirements for project scope
-    - Accessibility requirements
-    - Mobile responsiveness for project target
-
-# Data Tasks (using project-specific agent)
-Task:
-  description: "Design data layer tasks"
-  subagent_type: "{project-name}-data-specialist"  # Project-specific agent
-  prompt: |
-    Create data tasks for epic: $ARGUMENTS
-    
-    You know this project's:
-    - Database technology choice
-    - Schema patterns and relationships
-    - Data requirements from PRD
-    
-    Solo-Dev Data Strategy:
-    - Use the project's chosen database solution
-    - Follow established schema patterns
-    - Implement the specific data requirements
-    - Optimize for the project's scale and usage
-    
-    Return: Data task specifications with:
-    - Schema design using project database
-    - Migration strategy for project
-    - Data validation and relationships
-    - Performance considerations for project scale
-
-# Testing Strategy Tasks (using project-specific agent)
-Task:
-  description: "Plan comprehensive testing strategy"
-  subagent_type: "{project-name}-testing-specialist"  # Project-specific agent
-  prompt: |
-    Create testing tasks for epic: $ARGUMENTS
-    
-    You understand this project's:
-    - Testing framework choices
-    - Quality requirements
-    - Critical user paths
-    
-    Solo-Dev Testing Strategy:
-    - Use the project's testing stack
-    - Focus on the project's critical paths
-    - Balance coverage with development speed for this project
-    - Test the project's specific business logic
-    
-    Return: Testing task specifications with:
-    - Test strategy using project testing stack
-    - Coverage for project-specific features
-    - CI/CD integration with project pipeline
-    - Performance testing for project requirements
-
-# Setup Tasks (using project-specific agent)
-Task:
-  description: "Design project setup and configuration tasks"
-  subagent_type: "{project-name}-setup-specialist"  # Project-specific agent
-  prompt: |
-    Create setup tasks for epic: $ARGUMENTS
-    
-    You know this project's:
-    - Technology stack and versions
-    - Configuration requirements
-    - Development environment needs
-    
-    Solo-Dev Setup Strategy:
-    - Configure the project's chosen stack
-    - Set up the specific tools and dependencies
-    - Prepare the development environment for this project
-    - Ensure consistency with project decisions
-    
-    Return: Setup task specifications with:
-    - Environment configuration for project stack
-    - Dependency installation and setup
-    - Configuration files for project needs
-    - Development workflow setup
-
-# Deployment Tasks (using project-specific agent)
-Task:
-  description: "Design deployment and infrastructure tasks"
-  subagent_type: "{project-name}-deployment-specialist"  # Project-specific agent
-  prompt: |
-    Create deployment tasks for epic: $ARGUMENTS
-    
-    You understand this project's:
-    - Deployment target and strategy
-    - Infrastructure requirements
-    - Monitoring and maintenance needs
-    
-    Solo-Dev Deployment Strategy:
-    - Use the project's chosen hosting/deployment solution
-    - Implement the project's infrastructure requirements
-    - Set up monitoring for project-specific metrics
-    - Optimize costs for project scale
-    
-    Return: Deployment task specifications with:
-    - CI/CD setup for project stack
-    - Infrastructure configuration for project needs
-    - Monitoring and logging for project requirements
-    - Deployment strategy for project scale
+```bash
+# Check if project-specific agents exist (for assignment, not creation)
+PROJECT_AGENTS_EXIST=false
+if ls .claude/agents/$ARGUMENTS-*-specialist.md 2>/dev/null | grep -q .; then
+  PROJECT_AGENTS_EXIST=true
+  echo "✅ Project-specific agents found - will assign to tasks"
+else
+  echo "ℹ️ No project-specific agents - tasks will use generic assignments"
+  echo "   Run '/pm:agent-generate $ARGUMENTS' to create custom agents"
+fi
 ```
+
+**Launch task-planner agent to create all tasks:**
+
+```yaml
+Task:
+  description: "Decompose epic into actionable tasks"
+  subagent_type: "task-planner"
+  prompt: |
+    Decompose the epic for: $ARGUMENTS
+    
+    Epic location: .claude/epics/$ARGUMENTS/epic.md
+    
+    Instructions:
+    1. Read the epic file to understand requirements
+    2. Create numbered task files (001.md, 002.md, etc.) 
+    3. Each task should be 1-3 days of work
+    4. Include clear acceptance criteria
+    5. Mark parallelization opportunities
+    
+    Agent Assignment:
+    - Project agents exist: $PROJECT_AGENTS_EXIST
+    - If true, assign: $ARGUMENTS-{role}-specialist
+    - If false, assign: generic or leave empty
+    
+    Create tasks covering:
+    - Setup and configuration
+    - Backend/API implementation
+    - Frontend/UI development
+    - Data layer and migrations
+    - Testing strategy
+    - Deployment and operations
+    
+    Output: Task files in .claude/epics/$ARGUMENTS/
+```
+
+**The task-planner agent will:**
+1. Analyze the epic requirements
+2. Create granular, well-structured tasks
+3. Assign appropriate specialists (project-specific if they exist)
+4. Set dependencies and parallelization flags
+5. Provide effort estimates
 
 ### 4. Task File Format with Frontmatter
 For each task, create a file with this exact structure:
