@@ -47,12 +47,39 @@ echo "🔄 Creating epic issue..."
 # Extract content without frontmatter
 sed '1,/^---$/d; 1,/^---$/d' "$EPIC_FILE" > /tmp/epic-body.md
 
-# Create epic issue
-EPIC_NUMBER=$(gh issue create \
+# Create epic issue (handle different gh CLI versions)
+EPIC_OUTPUT=$(gh issue create \
     --title "🚀 Epic: $EPIC_NAME" \
     --body-file /tmp/epic-body.md \
-    --label "epic,solo-dev,enhancement,epic:$EPIC_NAME" \
-    --json number -q .number)
+    2>&1)
+
+# Extract issue number from output (format varies: URL or "Created issue #123")
+if echo "$EPIC_OUTPUT" | grep -q "github.com"; then
+    # URL format: https://github.com/owner/repo/issues/123
+    EPIC_NUMBER=$(echo "$EPIC_OUTPUT" | grep -o '/issues/[0-9]\+' | cut -d'/' -f3)
+else
+    # Other format: try to extract any number
+    EPIC_NUMBER=$(echo "$EPIC_OUTPUT" | grep -o '#[0-9]\+' | tr -d '#' | head -1)
+fi
+
+# Create and add labels (create if they don't exist)
+if [ -n "$EPIC_NUMBER" ]; then
+    # Create standard labels if they don't exist
+    gh label create "epic" --description "Epic-level feature or initiative" --color "8B5CF6" 2>/dev/null || true
+    gh label create "enhancement" --description "New feature or enhancement" --color "0E7490" 2>/dev/null || true
+    gh label create "task" --description "Individual task within an epic" --color "059669" 2>/dev/null || true
+    gh label create "backend" --description "Backend/API related work" --color "DC2626" 2>/dev/null || true
+    gh label create "frontend" --description "Frontend/UI related work" --color "2563EB" 2>/dev/null || true
+    gh label create "testing" --description "Testing related work" --color "7C3AED" 2>/dev/null || true
+    gh label create "deployment" --description "Deployment/DevOps related work" --color "EA580C" 2>/dev/null || true
+    gh label create "documentation" --description "Documentation related work" --color "65A30D" 2>/dev/null || true
+    
+    # Create epic-specific label
+    gh label create "epic:$EPIC_NAME" --description "Tasks belonging to $EPIC_NAME epic" --color "F59E0B" 2>/dev/null || true
+    
+    # Add labels to epic issue
+    gh issue edit "$EPIC_NUMBER" --add-label "epic,enhancement,epic:$EPIC_NAME" || echo "   ⚠️ Could not add some labels to epic"
+fi
 
 echo "✅ Created epic issue: #$EPIC_NUMBER"
 
@@ -114,16 +141,22 @@ for task_file in ".claude/epics/$EPIC_NAME/"[0-9][0-9][0-9].md; do
         *docs*|*documentation*) TASK_TYPE="documentation" ;;
     esac
     
-    # Create task issue as sub-issue of epic using gh-sub-issue extension
-    TASK_NUMBER=$(gh sub-issue $EPIC_NUMBER \
+    # Create task issue as sub-issue of epic using correct gh-sub-issue syntax
+    TASK_BODY=$(cat /tmp/task-body.md)
+    TASK_OUTPUT=$(gh sub-issue create \
+        --parent "$EPIC_NUMBER" \
         --title "$TASK_NAME" \
-        --body-file /tmp/task-body.md \
-        --label "task,solo-dev,$TASK_TYPE,epic:$EPIC_NAME" \
-        --json number -q .number 2>/dev/null) || {
+        --body "$TASK_BODY" \
+        --label "task" --label "$TASK_TYPE" --label "epic:$EPIC_NAME" \
+        2>&1) || {
         echo "   ❌ Failed to create: $TASK_NAME"
+        echo "   Error: $TASK_OUTPUT"
         FAILED_COUNT=$((FAILED_COUNT + 1))
         continue
     }
+    
+    # Extract issue number from output (look for "Created sub-issue #123")
+    TASK_NUMBER=$(echo "$TASK_OUTPUT" | grep "Created sub-issue" | grep -o '#[0-9]\+' | tr -d '#' | head -1)
     
     # Update task file with GitHub info
     TASK_URL="https://github.com/$REPO_NAME/issues/$TASK_NUMBER"
@@ -132,17 +165,13 @@ for task_file in ".claude/epics/$EPIC_NAME/"[0-9][0-9][0-9].md; do
     # Copy and update frontmatter
     cp "$task_file" "$NEW_FILE"
     
-    if grep -q '^github:' "$NEW_FILE"; then
-        sed -i "s|^github:.*|github: $TASK_URL|" "$NEW_FILE"
-    else
-        sed -i "/^---$/a\\github: $TASK_URL" "$NEW_FILE"
-    fi
+    # Update frontmatter fields (avoid duplicates)
+    # Remove existing github and updated fields first, then add new ones
+    sed -i '/^github:/d' "$NEW_FILE"
+    sed -i '/^updated:/d' "$NEW_FILE"
     
-    if grep -q '^updated:' "$NEW_FILE"; then
-        sed -i "s/^updated:.*/updated: $CURRENT_DATE/" "$NEW_FILE"
-    else
-        sed -i "/^---$/a\\updated: $CURRENT_DATE" "$NEW_FILE"
-    fi
+    # Add new fields after first ---
+    sed -i "1,/^---$/s|^---$|---\ngithub: $TASK_URL\nupdated: $CURRENT_DATE|" "$NEW_FILE"
     
     # Remove old file if different name
     [ "$task_file" != "$NEW_FILE" ] && rm "$task_file"
