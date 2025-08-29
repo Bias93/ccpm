@@ -153,7 +153,19 @@ After successfully creating the epic:
    - Number of task categories identified
    - Key architecture decisions
    - Estimated effort
-3. Suggest next step: "Ready to break down into tasks? Run: /pm:epic-decompose $ARGUMENTS"
+3. Suggest next steps:
+   ```
+   🎯 Next Steps:
+   
+   1. Generate project-specific subagents:
+      /pm:agent-generate $ARGUMENTS
+      
+   2. Then decompose into tasks:
+      /pm:epic-decompose $ARGUMENTS
+      
+   Or run both in sequence:
+      /pm:agent-generate $ARGUMENTS && /pm:epic-decompose $ARGUMENTS
+   ```
 
 ## Error Recovery
 

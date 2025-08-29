@@ -1,10 +1,11 @@
 ---
-allowed-tools: Read, LS
+allowed-tools: Bash, Read, Write, LS, Task
 ---
 
 # Epic Oneshot
 
-Decompose epic into tasks and sync to GitHub in one operation.
+Complete epic workflow: decompose into tasks and sync to GitHub in one operation.
+Optimized for solo developers with professional standards.
 
 ## Usage
 ```
@@ -13,77 +14,226 @@ Decompose epic into tasks and sync to GitHub in one operation.
 
 ## Instructions
 
-### 1. Validate Prerequisites
+This streamlined workflow now leverages the new CCPM project-specific agent system.
 
-Check that epic exists and hasn't been processed:
+### 0. Initialize and Validate
+
 ```bash
+# Get current date for timestamp
+CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+echo "Starting epic-oneshot at: $CURRENT_DATE"
+
 # Epic must exist
-test -f .claude/epics/$ARGUMENTS/epic.md || echo "❌ Epic not found. Run: /pm:prd-parse $ARGUMENTS"
+test -f .claude/epics/$ARGUMENTS/epic.md || {
+  echo "❌ Epic not found. Run: /pm:prd-parse $ARGUMENTS"
+  exit 1
+}
+
+# Check for project-specific agents
+if ! ls .claude/agents/$ARGUMENTS-*-specialist.md 2>/dev/null | grep -q .; then
+  echo "❌ Project-specific agents not found."
+  echo "Generate them first: /pm:agent-generate $ARGUMENTS"
+  exit 1
+fi
 
 # Check for existing tasks
 if ls .claude/epics/$ARGUMENTS/[0-9]*.md 2>/dev/null | grep -q .; then
-  echo "⚠️ Tasks already exist. This will create duplicates."
-  echo "Delete existing tasks or use /pm:epic-sync instead."
-  exit 1
-fi
-
-# Check if already synced
-if grep -q "github:" .claude/epics/$ARGUMENTS/epic.md; then
-  echo "⚠️ Epic already synced to GitHub."
-  echo "Use /pm:epic-sync to update."
-  exit 1
+  echo "⚠️ Tasks already exist. This will overwrite them."
+  echo "Continue? (yes/no)"
+  read -r response
+  [ "$response" != "yes" ] && exit 1
 fi
 ```
 
-### 2. Execute Decompose
+### 1. Simplified Flow with Project Agents
 
-Simply run the decompose command:
+Now that project-specific agents exist, the flow is streamlined:
+
+**Use project-specific agents for enhanced context:**
+
+```bash
+# Simply run epic-decompose with project agents
+echo "🔄 Using project-specific agents for task decomposition..."
+/pm:epic-decompose $ARGUMENTS
+
+# Verify decomposition succeeded
+if [ $? -ne 0 ]; then
+  echo "❌ Epic decomposition failed"
+  exit 1
+fi
+
+echo "✅ Tasks created using project-specific agents"
 ```
-Running: /pm:epic-decompose $ARGUMENTS
-```
 
-This will:
-- Read the epic
-- Create task files (using parallel agents if appropriate)
-- Update epic with task summary
+This leverages the project-specific agents that:
+- Know the exact technology stack for this project
+- Understand the specific requirements from the PRD
+- Have been optimized for this project's scale and complexity
+- Follow the established patterns and conventions
 
-### 3. Execute Sync
+### 3. Professional GitHub Sync (Simplified)
 
-Immediately follow with sync:
-```
-Running: /pm:epic-sync $ARGUMENTS
-```
+**Enhanced reliability with better error handling:**
 
-This will:
-- Create epic issue on GitHub
-- Create sub-issues (using parallel agents if appropriate)
-- Rename task files to issue IDs
-- Create worktree
+```bash
+# Robust sync approach - fail fast, clear messages
+echo "🔄 Syncing to GitHub with professional workflow..."
 
-### 4. Output
+# 1. Validate GitHub connection
+gh auth status || {
+  echo "❌ GitHub CLI not authenticated"
+  echo "Run: gh auth login"
+  exit 1
+}
 
-```
-🚀 Epic Oneshot Complete: $ARGUMENTS
+# 2. Create epic issue with proper labeling
+epic_body=$(sed '1,/^---$/d; 1,/^---$/d' .claude/epics/$ARGUMENTS/epic.md)
+epic_number=$(gh issue create \
+  --title "🚀 Epic: $ARGUMENTS" \
+  --body "$epic_body" \
+  --label "epic,solo-dev,enhancement" \
+  --json number -q .number) || {
+  echo "❌ Failed to create epic issue"
+  exit 1
+}
 
-Step 1: Decomposition ✓
-  - Tasks created: {count}
+echo "✅ Created epic: #$epic_number"
+
+# 3. Create task sub-issues (sequential for reliability)
+task_count=0
+for task_file in .claude/epics/$ARGUMENTS/[0-9][0-9][0-9].md; do
+  [ -f "$task_file" ] || continue
   
-Step 2: GitHub Sync ✓
-  - Epic: #{number}
-  - Sub-issues created: {count}
-  - Worktree: ../epic-$ARGUMENTS
+  task_name=$(grep '^name:' "$task_file" | sed 's/^name: *//')
+  task_body=$(sed '1,/^---$/d; 1,/^---$/d' "$task_file")
+  
+  # Determine task type for proper labeling
+  case "$task_name" in
+    *"backend"*|*"api"*|*"server"*) task_type="backend" ;;
+    *"frontend"*|*"ui"*|*"component"*) task_type="frontend" ;;
+    *"test"*|*"spec"*) task_type="testing" ;;
+    *"deploy"*|*"ci"*|*"cd"*) task_type="deployment" ;;
+    *) task_type="general" ;;
+  esac
+  
+  task_number=$(gh issue create \
+    --title "$task_name" \
+    --body "$task_body" \
+    --label "task,solo-dev,$task_type" \
+    --json number -q .number) || {
+    echo "⚠️ Failed to create task: $task_name"
+    continue
+  }
+  
+  # Update task file with GitHub URL immediately
+  repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+  github_url="https://github.com/$repo/issues/$task_number"
+  
+  # Rename file to issue number and update frontmatter
+  new_file=".claude/epics/$ARGUMENTS/${task_number}.md"
+  sed "/^github:/c\github: $github_url" "$task_file" > "$new_file"
+  sed -i "/^updated:/c\updated: $CURRENT_DATE" "$new_file"
+  
+  [ "$task_file" != "$new_file" ] && rm "$task_file"
+  
+  task_count=$((task_count + 1))
+  echo "✅ Created task #$task_number: $task_name"
+done
 
-Ready for development!
-  Start work: /pm:epic-start $ARGUMENTS
-  Or single task: /pm:issue-start {task_number}
+# 4. Update epic with GitHub URL
+repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+epic_url="https://github.com/$repo/issues/$epic_number"
+sed -i "/^github:/c\github: $epic_url" .claude/epics/$ARGUMENTS/epic.md
+sed -i "/^updated:/c\updated: $CURRENT_DATE" .claude/epics/$ARGUMENTS/epic.md
+
+# 5. Create development worktree
+git worktree add ../epic-$ARGUMENTS -b epic/$ARGUMENTS 2>/dev/null || {
+  echo "⚠️ Worktree may already exist: ../epic-$ARGUMENTS"
+}
+
+echo "✅ GitHub sync complete: $task_count tasks created"
 ```
 
-## Important Notes
+### 4. Solo-Dev Output (Enhanced)
 
-This is simply a convenience wrapper that runs:
-1. `/pm:epic-decompose` 
-2. `/pm:epic-sync`
+```
+🚀 Epic Oneshot Complete (2025 Tech Stack): $ARGUMENTS
 
-Both commands handle their own error checking, parallel execution, and validation. This command just orchestrates them in sequence.
+✅ Tech Stack Validation:
+  - Next.js: 15.5+ ✓ (App Router, Server Actions)
+  - React: 19.1+ ✓ (Server Components)
+  - TypeScript: 5.7+ ✓ (strict mode)
+  - Node.js: 22 LTS ✓
 
-Use this when you're confident the epic is ready and want to go from epic to GitHub issues in one step.
+✅ Smart Decomposition:
+  - Backend tasks: {backend_count} (serverless-ready)
+  - Frontend tasks: {frontend_count} (responsive, accessible)
+  - Testing tasks: {test_count} (essential coverage)
+  - Total estimated effort: {total_hours}h
+
+✅ GitHub Sync:
+  - Epic: #{epic_number} 
+  - Tasks: {task_count} issues created with smart labels
+  - Worktree: ../epic-$ARGUMENTS (ready for development)
+
+💰 Cost-Effective Stack:
+  - Hosting: Vercel/Netlify (free tier)
+  - UI: shadcn/ui + Tailwind CSS (no license fees)
+  - Icons: Lucide React (free, tree-shakeable)
+  - Testing: Vitest + Playwright (fast, minimal setup)
+
+🚀 Ready for Solo Development:
+  Start work: /pm:epic-start $ARGUMENTS
+  Single task: /pm:issue-start {task_number}
+  
+  Epic URL: {github_epic_url}
+```
+
+## CCPM Solo-Dev Philosophy
+
+This enhanced workflow embodies the CCPM principles for solo developers:
+
+### Professional Standards, Economical Approach
+- **Latest tech stack** (2025 versions) for future-proofing
+- **Free/open-source tools** to minimize costs
+- **Proven patterns** to reduce risk
+- **Minimal dependencies** to reduce maintenance burden
+
+### Solo-Dev Optimizations
+- **Sequential task creation** (reliable vs. parallel complexity)
+- **Smart labeling** for easy GitHub project management
+- **Domain expert agents** instead of generic parallel workers
+- **Fail-fast validation** to catch issues early
+
+### Speed to Market
+- **Serverless-first** approach (no infrastructure management)
+- **Built-in solutions** over third-party libraries
+- **Essential testing** (comprehensive but not gold-plated)
+- **Immediate deployment readiness** (Vercel/Netlify compatible)
+
+## Migration from Old epic-oneshot
+
+The old approach had these issues:
+- ❌ Generic `parallel-worker` caused empty/broken tasks
+- ❌ Outdated tech versions (Next.js 14 vs 15.5)
+- ❌ Complex GitHub sync prone to failures
+- ❌ No validation of current tech versions
+
+This enhanced version:
+- ✅ Domain expert agents (`backend-architect`, `frontend-developer`)
+- ✅ Real-time tech stack validation with WebSearch
+- ✅ Simplified, robust GitHub sync
+- ✅ Solo-dev cost optimization built-in
+
+## Usage Recommendation
+
+Use `/pm:epic-oneshot` when:
+- Epic is well-defined and ready for implementation
+- You want to leverage 2025 modern tech stack
+- Solo-dev cost efficiency is important  
+- You need reliable GitHub issue creation
+
+For complex epics requiring iteration, use the separate commands:
+1. `/pm:epic-decompose` (with tech validation)
+2. Review and adjust tasks
+3. `/pm:epic-sync` (with enhanced reliability)

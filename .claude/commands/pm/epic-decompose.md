@@ -1,10 +1,10 @@
 ---
-allowed-tools: Bash, Read, Write, LS, Task
+allowed-tools: Bash, Read, Write, LS, Task, WebSearch, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 ---
 
 # Epic Decompose
 
-Break epic into concrete, actionable tasks.
+Break epic into concrete, actionable tasks optimized for solo developers.
 
 ## Usage
 ```
@@ -15,6 +15,7 @@ Break epic into concrete, actionable tasks.
 
 **IMPORTANT:** Before executing this command, read and follow:
 - `.claude/rules/datetime.md` - For getting real current date/time
+- Tech stack validation with WebSearch for 2025 versions
 
 ## Preflight Checklist
 
@@ -47,35 +48,169 @@ You are decomposing an epic into specific, actionable tasks for: **$ARGUMENTS**
 - Understand the technical approach and requirements
 - Review the task breakdown preview
 
-### 2. Analyze for Parallel Creation
+### 2. Prepare for Task Creation
 
-Determine if tasks can be created in parallel:
-- If tasks are mostly independent: Create in parallel using Task agents
-- If tasks have complex dependencies: Create sequentially
-- For best results: Group independent tasks for parallel creation
+```bash
+# Get current timestamp for all operations
+CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+echo "Starting epic-decompose at: $CURRENT_DATE"
+```
 
-### 3. Parallel Task Creation (When Possible)
+### 3. Create Tasks Using Project-Specific Agents
 
-If tasks can be created in parallel, spawn sub-agents:
+**Use project-specific agents created by agent-generate:**
 
+Before decomposing tasks, verify that project-specific agents exist:
+- Check for agents in `.claude/agents/{project-name}-*-specialist.md`
+- If not found, suggest running: `/pm:agent-generate $ARGUMENTS` first
+
+**Task Creation Strategy:**
 ```yaml
+# Backend Tasks (using project-specific agent)
 Task:
-  description: "Create task files batch {X}"
-  subagent_type: "general-purpose"
+  description: "Design backend architecture tasks"
+  subagent_type: "{project-name}-backend-specialist"  # Project-specific agent
   prompt: |
-    Create task files for epic: $ARGUMENTS
+    Create backend tasks for epic: $ARGUMENTS
     
-    Tasks to create:
-    - {list of 3-4 tasks for this batch}
+    You have full context of this project's:
+    - Technology stack decisions
+    - Architecture patterns
+    - Requirements from PRD
     
-    For each task:
-    1. Create file: .claude/epics/$ARGUMENTS/{number}.md
-    2. Use exact format with frontmatter and all sections
-    3. Follow task breakdown from epic
-    4. Set parallel/depends_on fields appropriately
-    5. Number sequentially (001.md, 002.md, etc.)
+    Solo-Dev Strategy:
+    - Use the established project stack
+    - Follow the project's architectural decisions
+    - Focus on rapid development with your known tools
+    - Leverage the cost-effective choices already made
     
-    Return: List of files created
+    Return: Backend task specifications with:
+    - Task name and description
+    - Implementation approach using project stack
+    - Dependencies and order
+    - Estimated effort (XS/S/M/L/XL)
+    - Project-specific considerations
+
+# Frontend Tasks (using project-specific agent)  
+Task:
+  description: "Design frontend development tasks"
+  subagent_type: "{project-name}-frontend-specialist"  # Project-specific agent
+  prompt: |
+    Create frontend tasks for epic: $ARGUMENTS
+    
+    You understand this project's:
+    - UI framework and component choices
+    - Design system decisions
+    - User experience requirements
+    
+    Solo-Dev Frontend Strategy:
+    - Use the project's chosen UI framework
+    - Follow established component patterns
+    - Implement the specific UX requirements
+    - Optimize for the project's target users
+    
+    Return: Frontend task specifications with:
+    - Component/page/feature breakdown using project stack
+    - User experience based on project requirements
+    - Performance requirements for project scope
+    - Accessibility requirements
+    - Mobile responsiveness for project target
+
+# Data Tasks (using project-specific agent)
+Task:
+  description: "Design data layer tasks"
+  subagent_type: "{project-name}-data-specialist"  # Project-specific agent
+  prompt: |
+    Create data tasks for epic: $ARGUMENTS
+    
+    You know this project's:
+    - Database technology choice
+    - Schema patterns and relationships
+    - Data requirements from PRD
+    
+    Solo-Dev Data Strategy:
+    - Use the project's chosen database solution
+    - Follow established schema patterns
+    - Implement the specific data requirements
+    - Optimize for the project's scale and usage
+    
+    Return: Data task specifications with:
+    - Schema design using project database
+    - Migration strategy for project
+    - Data validation and relationships
+    - Performance considerations for project scale
+
+# Testing Strategy Tasks (using project-specific agent)
+Task:
+  description: "Plan comprehensive testing strategy"
+  subagent_type: "{project-name}-testing-specialist"  # Project-specific agent
+  prompt: |
+    Create testing tasks for epic: $ARGUMENTS
+    
+    You understand this project's:
+    - Testing framework choices
+    - Quality requirements
+    - Critical user paths
+    
+    Solo-Dev Testing Strategy:
+    - Use the project's testing stack
+    - Focus on the project's critical paths
+    - Balance coverage with development speed for this project
+    - Test the project's specific business logic
+    
+    Return: Testing task specifications with:
+    - Test strategy using project testing stack
+    - Coverage for project-specific features
+    - CI/CD integration with project pipeline
+    - Performance testing for project requirements
+
+# Setup Tasks (using project-specific agent)
+Task:
+  description: "Design project setup and configuration tasks"
+  subagent_type: "{project-name}-setup-specialist"  # Project-specific agent
+  prompt: |
+    Create setup tasks for epic: $ARGUMENTS
+    
+    You know this project's:
+    - Technology stack and versions
+    - Configuration requirements
+    - Development environment needs
+    
+    Solo-Dev Setup Strategy:
+    - Configure the project's chosen stack
+    - Set up the specific tools and dependencies
+    - Prepare the development environment for this project
+    - Ensure consistency with project decisions
+    
+    Return: Setup task specifications with:
+    - Environment configuration for project stack
+    - Dependency installation and setup
+    - Configuration files for project needs
+    - Development workflow setup
+
+# Deployment Tasks (using project-specific agent)
+Task:
+  description: "Design deployment and infrastructure tasks"
+  subagent_type: "{project-name}-deployment-specialist"  # Project-specific agent
+  prompt: |
+    Create deployment tasks for epic: $ARGUMENTS
+    
+    You understand this project's:
+    - Deployment target and strategy
+    - Infrastructure requirements
+    - Monitoring and maintenance needs
+    
+    Solo-Dev Deployment Strategy:
+    - Use the project's chosen hosting/deployment solution
+    - Implement the project's infrastructure requirements
+    - Set up monitoring for project-specific metrics
+    - Optimize costs for project scale
+    
+    Return: Deployment task specifications with:
+    - CI/CD setup for project stack
+    - Infrastructure configuration for project needs
+    - Monitoring and logging for project requirements
+    - Deployment strategy for project scale
 ```
 
 ### 4. Task File Format with Frontmatter
@@ -91,6 +226,11 @@ github: [Will be updated when synced to GitHub]
 depends_on: []  # List of task numbers this depends on, e.g., [001, 002]
 parallel: true  # Can this run in parallel with other tasks?
 conflicts_with: []  # Tasks that modify same files, e.g., [003, 004]
+subagent_type: {project-name}-{role}-specialist  # Project-specific agent to handle this task
+subagent_context: |  # Project context for the agent
+  Project Stack: [Include stack from agent-generate]
+  Key Requirements: [Relevant PRD requirements]
+  Implementation Notes: [Task-specific guidance]
 ---
 
 # Task: [Task Title]
